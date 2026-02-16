@@ -5,8 +5,6 @@ import {
   Shield,
   Globe,
   Languages,
-  MessageSquare,
-  Bell,
   Settings,
   FileText,
   ChevronLeft,
@@ -19,8 +17,6 @@ const navItems = [
   { path: '/roles', label: 'Roles & Permissions', icon: Shield },
   { path: '/countries', label: 'Country Master', icon: Globe },
   { path: '/translations', label: 'Translations', icon: Languages },
-  { path: '/messages', label: 'API Messages', icon: MessageSquare },
-  { path: '/notifications', label: 'Notification Templates', icon: Bell },
   { path: '/global-configs', label: 'Global Config', icon: Settings },
   { path: '/audit-logs', label: 'Audit Logs', icon: FileText },
 ];

@@ -8,8 +8,6 @@ import { RoleListPage } from '../pages/roles/RoleListPage';
 import { PermissionListPage } from '../pages/permissions/PermissionListPage';
 import { CountryListPage } from '../pages/countries/CountryListPage';
 import { TranslationListPage } from '../pages/translations/TranslationListPage';
-import { MessageListPage } from '../pages/messages/MessageListPage';
-import { NotificationListPage } from '../pages/notifications/NotificationListPage';
 import { GlobalConfigListPage } from '../pages/globalConfigs/GlobalConfigListPage';
 import { AuditLogPage } from '../pages/audit/AuditLogPage';
 
@@ -32,8 +30,8 @@ export function AppRoutes() {
         <Route path="permissions" element={<PermissionListPage />} />
         <Route path="countries" element={<CountryListPage />} />
         <Route path="translations" element={<TranslationListPage />} />
-        <Route path="messages" element={<MessageListPage />} />
-        <Route path="notifications" element={<NotificationListPage />} />
+        <Route path="messages" element={<Navigate to="/translations" replace />} />
+        <Route path="notifications" element={<Navigate to="/translations" replace />} />
         <Route path="global-configs" element={<GlobalConfigListPage />} />
         <Route path="audit-logs" element={<AuditLogPage />} />
       </Route>
