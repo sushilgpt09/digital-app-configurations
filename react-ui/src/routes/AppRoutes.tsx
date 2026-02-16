@@ -4,8 +4,6 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { UserListPage } from '../pages/users/UserListPage';
-import { RoleListPage } from '../pages/roles/RoleListPage';
-import { PermissionListPage } from '../pages/permissions/PermissionListPage';
 import { CountryListPage } from '../pages/countries/CountryListPage';
 import { TranslationListPage } from '../pages/translations/TranslationListPage';
 import { GlobalConfigListPage } from '../pages/globalConfigs/GlobalConfigListPage';
@@ -26,8 +24,8 @@ export function AppRoutes() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="users" element={<UserListPage />} />
-        <Route path="roles" element={<RoleListPage />} />
-        <Route path="permissions" element={<PermissionListPage />} />
+        <Route path="roles" element={<Navigate to="/users" replace />} />
+        <Route path="permissions" element={<Navigate to="/users" replace />} />
         <Route path="countries" element={<CountryListPage />} />
         <Route path="translations" element={<TranslationListPage />} />
         <Route path="messages" element={<Navigate to="/translations" replace />} />

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Languages, MessageSquare, Bell } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { translationsApi } from '../../api/translations.api';
 import { messagesApi } from '../../api/messages.api';
 import { notificationsApi } from '../../api/notifications.api';
@@ -19,12 +20,6 @@ import toast from 'react-hot-toast';
 
 type TabKey = 'localized' | 'api_messages' | 'notifications';
 
-const tabs: { key: TabKey; label: string; icon: typeof Languages }[] = [
-  { key: 'localized', label: 'Localized Strings', icon: Languages },
-  { key: 'api_messages', label: 'API Responses', icon: MessageSquare },
-  { key: 'notifications', label: 'Notifications', icon: Bell },
-];
-
 const typeColors: Record<string, string> = {
   ERROR: 'bg-red-100 text-red-700',
   SUCCESS: 'bg-green-100 text-green-700',
@@ -38,8 +33,12 @@ const notifTypeColors: Record<string, string> = {
   EMAIL: 'bg-orange-100 text-orange-700',
 };
 
+const validTabs: TabKey[] = ['localized', 'api_messages', 'notifications'];
+
 export function TranslationListPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('localized');
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') as TabKey | null;
+  const activeTab: TabKey = tabParam && validTabs.includes(tabParam) ? tabParam : 'localized';
 
   // Localized strings state
   const [transData, setTransData] = useState<PagedResponse<Translation>>({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0, last: true });
@@ -129,6 +128,7 @@ export function TranslationListPage() {
     { key: 'status', header: 'STATUS', render: (n) => <StatusBadge status={n.status} /> },
   ];
 
+  const pageTitles: Record<TabKey, string> = { localized: 'Localized Strings', api_messages: 'API Responses', notifications: 'Notifications' };
   const addLabels: Record<TabKey, string> = { localized: 'Add Translation', api_messages: 'Add Message', notifications: 'Add Template' };
 
   const handleAdd = () => {
@@ -140,7 +140,7 @@ export function TranslationListPage() {
   return (
     <div>
       <PageHeader
-        title="Translations"
+        title={pageTitles[activeTab]}
         action={
           <button onClick={handleAdd} className="flex items-center gap-2 px-5 py-2.5 bg-[#5C90E6] text-white rounded-lg hover:bg-[#4A7DD4] transition-colors">
             <Plus size={18} /> {addLabels[activeTab]}
@@ -148,30 +148,7 @@ export function TranslationListPage() {
         }
       />
 
-      {/* Tabs */}
-      <div className="bg-white rounded-lg border border-gray-200 mb-6">
-        <div className="flex border-b border-gray-200">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-6 py-3.5 text-sm font-medium transition-colors relative ${
-                activeTab === tab.key
-                  ? 'text-[#5C90E6]'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <tab.icon size={18} />
-              {tab.label}
-              {activeTab === tab.key && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C90E6]" />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Localized Strings Tab */}
+      {/* Localized Strings */}
       {activeTab === 'localized' && (
         <>
           <SearchFilter

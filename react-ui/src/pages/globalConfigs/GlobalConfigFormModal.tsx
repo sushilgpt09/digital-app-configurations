@@ -31,7 +31,7 @@ export function GlobalConfigFormModal({ isOpen, onClose, onSuccess, item }: Prop
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Global Config' : 'Add Global Config'} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit App Genral Config' : 'Add App Genral Config'} size="lg">
       <form onSubmit={handleSubmit}>
         <InputField label="Config Key" value={form.configKey} onChange={(e) => setForm({ ...form, configKey: e.target.value })} placeholder="e.g. app.min_version" required />
         <InputField label="Config Value" value={form.configValue || ''} onChange={(e) => setForm({ ...form, configValue: e.target.value })} />

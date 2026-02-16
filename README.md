@@ -234,7 +234,7 @@ digital-app-configurations/
 │       │   │       ├── NotificationTemplateRequest.java
 │       │   │       └── NotificationTemplateResponse.java
 │       │   │
-│       │   ├── globalconfig/             # Global Config module
+│       │   ├── globalconfig/             # App Genral Config module
 │       │   │   ├── entity/GlobalConfig.java
 │       │   │   ├── repository/GlobalConfigRepository.java
 │       │   │   ├── service/GlobalConfigService.java
@@ -799,7 +799,7 @@ All other endpoints require a valid JWT token and specific permissions:
 | `TRANSLATION_VIEW`, `TRANSLATION_CREATE`, `TRANSLATION_UPDATE`, `TRANSLATION_DELETE` | Translations | CRUD |
 | `MESSAGE_VIEW`, `MESSAGE_CREATE`, `MESSAGE_UPDATE`, `MESSAGE_DELETE` | Messages | CRUD |
 | `NOTIFICATION_VIEW`, `NOTIFICATION_CREATE`, `NOTIFICATION_UPDATE`, `NOTIFICATION_DELETE` | Notifications | CRUD |
-| `CONFIG_VIEW`, `CONFIG_CREATE`, `CONFIG_UPDATE`, `CONFIG_DELETE` | Global Config | CRUD |
+| `CONFIG_VIEW`, `CONFIG_CREATE`, `CONFIG_UPDATE`, `CONFIG_DELETE` | App Genral Config | CRUD |
 | `AUDIT_VIEW` | Audit Logs | Read-only |
 
 ### Password Hashing

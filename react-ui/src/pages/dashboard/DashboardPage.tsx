@@ -1,9 +1,8 @@
-import { Users, Shield, Globe, Languages, Settings, FileText } from 'lucide-react';
+import { Users, Globe, Languages, Settings, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const stats = [
   { label: 'Users', icon: Users, path: '/users', bgColor: 'bg-blue-100', iconColor: 'text-[#5C90E6]' },
-  { label: 'Roles', icon: Shield, path: '/roles', bgColor: 'bg-purple-100', iconColor: 'text-purple-600' },
   { label: 'Countries', icon: Globe, path: '/countries', bgColor: 'bg-blue-100', iconColor: 'text-[#5C90E6]' },
   { label: 'Translations', icon: Languages, path: '/translations', bgColor: 'bg-orange-100', iconColor: 'text-orange-600' },
   { label: 'Global Configs', icon: Settings, path: '/global-configs', bgColor: 'bg-indigo-100', iconColor: 'text-indigo-600' },
