@@ -28,7 +28,7 @@ export function ConfirmDialog({
         <div className="flex gap-3 w-full">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-wing-border rounded-lg text-wing-text hover:bg-gray-50 transition-colors"
+            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
             disabled={loading}
           >
             Cancel

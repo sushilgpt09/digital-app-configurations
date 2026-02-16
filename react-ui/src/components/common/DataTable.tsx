@@ -43,28 +43,28 @@ export function DataTable<T>({
   const hasActions = onEdit || onDelete;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-wing-border overflow-hidden">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead>
-            <tr className="bg-gray-50 border-b border-wing-border">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                  className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   style={col.width ? { width: col.width } : undefined}
                 >
                   {col.header}
                 </th>
               ))}
               {hasActions && (
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-[120px]">
+                <th className="px-4 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[120px]">
                   Actions
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-wing-border">
+          <tbody className="bg-white divide-y divide-gray-200">
             {data.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + (hasActions ? 1 : 0)} className="px-6 py-12 text-center text-gray-400">
@@ -75,22 +75,22 @@ export function DataTable<T>({
               data.map((item, index) => (
                 <tr
                   key={rowKey ? rowKey(item) : index}
-                  className="hover:bg-gray-50/50 transition-colors"
+                  className="hover:bg-gray-50 transition-colors"
                 >
                   {columns.map((col) => (
-                    <td key={col.key} className="px-6 py-4 text-sm text-wing-text">
+                    <td key={col.key} className="px-4 sm:px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {col.render
                         ? col.render(item, page * size + index)
                         : String((item as Record<string, unknown>)[col.key] ?? '')}
                     </td>
                   ))}
                   {hasActions && (
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 sm:px-6 py-2 text-center">
                       <div className="flex items-center justify-center gap-2">
                         {onEdit && (
                           <button
                             onClick={() => onEdit(item)}
-                            className="p-2 text-wing-info hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                             title="Edit"
                           >
                             <Pencil size={16} />
@@ -99,7 +99,7 @@ export function DataTable<T>({
                         {onDelete && (
                           <button
                             onClick={() => onDelete(item)}
-                            className="p-2 text-wing-danger hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete"
                           >
                             <Trash2 size={16} />
@@ -116,7 +116,7 @@ export function DataTable<T>({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between px-6 py-4 border-t border-wing-border bg-gray-50/50">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50/50">
         <span className="text-sm text-gray-500">
           Total {totalElements} Items
         </span>
@@ -125,7 +125,7 @@ export function DataTable<T>({
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page === 0}
-            className="p-1.5 rounded-lg border border-wing-border hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-lg border border-gray-200 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronLeft size={16} />
           </button>
@@ -139,10 +139,10 @@ export function DataTable<T>({
               <button
                 key={pageNum}
                 onClick={() => onPageChange(pageNum)}
-                className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                className={`min-w-[2.5rem] px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   page === pageNum
-                    ? 'bg-wing-info text-white'
-                    : 'border border-wing-border hover:bg-white text-gray-600'
+                    ? 'bg-[#5C90E6] text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 {pageNum + 1}
@@ -153,7 +153,7 @@ export function DataTable<T>({
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages - 1}
-            className="p-1.5 rounded-lg border border-wing-border hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-lg border border-gray-200 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronRight size={16} />
           </button>
@@ -164,7 +164,7 @@ export function DataTable<T>({
           <select
             value={size}
             onChange={(e) => onSizeChange?.(Number(e.target.value))}
-            className="border border-wing-border rounded-lg px-2 py-1 bg-white"
+            className="border border-gray-200 rounded-lg px-2 py-1 bg-white"
           >
             {[10, 20, 50].map((s) => (
               <option key={s} value={s}>{s}</option>

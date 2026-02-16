@@ -42,7 +42,7 @@ export function GlobalConfigListPage() {
 
   return (
     <div>
-      <PageHeader title="Global Configuration" action={<button onClick={() => { setEditingItem(null); setShowForm(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-wing-info text-white rounded-lg hover:bg-blue-600"><Plus size={18} /> Add Config</button>} />
+      <PageHeader title="Global Configuration" action={<button onClick={() => { setEditingItem(null); setShowForm(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-[#5C90E6] text-white rounded-lg hover:bg-[#4A7DD4] transition-colors"><Plus size={18} /> Add Config</button>} />
       <SearchFilter searchValue={search} onSearchChange={setSearch} onSearch={() => { setSearchQuery(search); setPage(0); }} onReset={() => { setSearch(''); setSearchQuery(''); setPage(0); }} placeholder="Search configs..." />
       <DataTable columns={columns} data={data.content} loading={loading} page={data.page} size={data.size} totalElements={data.totalElements} totalPages={data.totalPages} onPageChange={setPage} onSizeChange={(s) => { setSize(s); setPage(0); }} onEdit={(g) => { setEditingItem(g); setShowForm(true); }} onDelete={setDeleteTarget} rowKey={(g) => g.id} />
       <GlobalConfigFormModal isOpen={showForm} onClose={() => setShowForm(false)} onSuccess={fetchData} item={editingItem} />

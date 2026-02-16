@@ -33,23 +33,10 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen bg-wing-secondary text-white transition-all duration-300 z-40 flex flex-col ${
-        collapsed ? 'w-[72px]' : 'w-[260px]'
+      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 transition-all duration-300 z-40 flex-col shadow-sm hidden lg:flex ${
+        collapsed ? 'w-[72px]' : 'w-64'
       }`}
     >
-      {/* Logo area */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-white/10">
-        <div className="w-10 h-10 bg-wing-primary rounded-lg flex items-center justify-center flex-shrink-0">
-          <span className="text-white font-bold text-lg">W</span>
-        </div>
-        {!collapsed && (
-          <div className="overflow-hidden">
-            <h1 className="font-bold text-base leading-tight">Wing Bank</h1>
-            <p className="text-xs text-white/60">Config System</p>
-          </div>
-        )}
-      </div>
-
       {/* Navigation */}
       <nav className="flex-1 py-4 overflow-y-auto">
         {navItems.map((item) => (
@@ -57,17 +44,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-colors ${
+              `flex items-center gap-3 px-3 py-2.5 mx-2 rounded-md transition-all duration-150 text-sm font-normal ${
                 isActive
-                  ? 'bg-wing-primary text-white'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  ? 'bg-[#5C90E6] text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-gray-50'
               }`
             }
             title={collapsed ? item.label : undefined}
           >
             <item.icon size={20} className="flex-shrink-0" />
             {!collapsed && (
-              <span className="text-sm font-medium truncate">{item.label}</span>
+              <span className="truncate">{item.label}</span>
             )}
           </NavLink>
         ))}
@@ -76,7 +63,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Collapse toggle */}
       <button
         onClick={onToggle}
-        className="flex items-center justify-center p-3 border-t border-white/10 hover:bg-white/10 transition-colors"
+        className="flex items-center justify-center p-3 border-t border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
       >
         {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
       </button>
