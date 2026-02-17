@@ -1,11 +1,11 @@
-import { Users, Globe, Languages, Settings, FileText } from 'lucide-react';
+import { Users, Globe, Languages, FileText, Smartphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const stats = [
   { label: 'Users', icon: Users, path: '/users', bgColor: 'bg-blue-100', iconColor: 'text-[#5C90E6]' },
   { label: 'Countries', icon: Globe, path: '/countries', bgColor: 'bg-blue-100', iconColor: 'text-[#5C90E6]' },
   { label: 'Translations', icon: Languages, path: '/translations', bgColor: 'bg-orange-100', iconColor: 'text-orange-600' },
-  { label: 'Global Configs', icon: Settings, path: '/global-configs', bgColor: 'bg-indigo-100', iconColor: 'text-indigo-600' },
+  { label: 'App Releases', icon: Smartphone, path: '/releases', bgColor: 'bg-green-100', iconColor: 'text-green-600' },
   { label: 'Audit Logs', icon: FileText, path: '/audit-logs', bgColor: 'bg-gray-100', iconColor: 'text-gray-600' },
 ];
 
@@ -56,11 +56,11 @@ export function DashboardPage() {
             <span className="text-sm font-medium">Manage Translations</span>
           </Link>
           <Link
-            to="/global-configs"
+            to="/releases"
             className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-[#EBF3FE] transition-all group"
           >
-            <Settings className="text-[#5C90E6]" size={20} />
-            <span className="text-sm font-medium">Global Configurations</span>
+            <Smartphone className="text-[#5C90E6]" size={20} />
+            <span className="text-sm font-medium">App Releases</span>
           </Link>
         </div>
       </div>

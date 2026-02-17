@@ -29,8 +29,7 @@ public class CountryServiceImpl implements CountryService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<CountryResponse> getAllCountries(String search, String status, int page, int size) {
-        Country.Status statusEnum = status != null ? Country.Status.valueOf(status) : null;
-        Page<Country> countryPage = countryRepository.findAllWithFilters(search, statusEnum, PageRequest.of(page, size));
+        Page<Country> countryPage = countryRepository.findAllWithFilters(search, status, PageRequest.of(page, size));
         var content = countryPage.getContent().stream().map(this::toResponse).collect(Collectors.toList());
         return PagedResponse.from(countryPage, content);
     }

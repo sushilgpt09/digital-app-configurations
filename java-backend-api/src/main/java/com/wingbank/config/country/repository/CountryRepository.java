@@ -18,11 +18,16 @@ public interface CountryRepository extends JpaRepository<Country, UUID> {
 
     List<Country> findByStatus(Country.Status status);
 
-    @Query("SELECT c FROM Country c WHERE " +
-           "(:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(c.code) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:status IS NULL OR c.status = :status)")
+    @Query(value = "SELECT * FROM countries WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(name) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           countQuery = "SELECT COUNT(*) FROM countries WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(name) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           nativeQuery = true)
     Page<Country> findAllWithFilters(@Param("search") String search,
-                                     @Param("status") Country.Status status,
+                                     @Param("status") String status,
                                      Pageable pageable);
 }

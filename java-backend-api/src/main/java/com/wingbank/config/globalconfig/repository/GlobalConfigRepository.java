@@ -19,13 +19,19 @@ public interface GlobalConfigRepository extends JpaRepository<GlobalConfig, UUID
            "AND g.status = 'ACTIVE'")
     List<GlobalConfig> findByPlatformActive(@Param("platform") String platform);
 
-    @Query("SELECT g FROM GlobalConfig g WHERE " +
-           "(:search IS NULL OR LOWER(g.configKey) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(g.description) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:platform IS NULL OR g.platform = :platform) " +
-           "AND (:status IS NULL OR g.status = :status)")
+    @Query(value = "SELECT * FROM global_configs WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(config_key) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(description) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:platform IS NULL OR platform = CAST(:platform AS TEXT)) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           countQuery = "SELECT COUNT(*) FROM global_configs WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(config_key) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(description) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:platform IS NULL OR platform = CAST(:platform AS TEXT)) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           nativeQuery = true)
     Page<GlobalConfig> findAllWithFilters(@Param("search") String search,
                                            @Param("platform") String platform,
-                                           @Param("status") GlobalConfig.Status status,
+                                           @Param("status") String status,
                                            Pageable pageable);
 }

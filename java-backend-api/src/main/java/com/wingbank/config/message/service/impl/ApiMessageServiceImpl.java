@@ -31,8 +31,7 @@ public class ApiMessageServiceImpl implements ApiMessageService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<ApiMessageResponse> getAllMessages(String search, String type, int page, int size) {
-        ApiMessage.MessageType typeEnum = type != null ? ApiMessage.MessageType.valueOf(type) : null;
-        Page<ApiMessage> messagePage = apiMessageRepository.findAllWithFilters(search, typeEnum, PageRequest.of(page, size));
+        Page<ApiMessage> messagePage = apiMessageRepository.findAllWithFilters(search, type, PageRequest.of(page, size));
         var content = messagePage.getContent().stream().map(this::toResponse).collect(Collectors.toList());
         return PagedResponse.from(messagePage, content);
     }

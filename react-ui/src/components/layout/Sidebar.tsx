@@ -5,8 +5,8 @@ import {
   Users,
   Globe,
   Languages,
-  Settings,
   FileText,
+  Smartphone,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Bell,
   Type,
+  Database,
 } from 'lucide-react';
 
 type NavItem = {
@@ -46,7 +47,15 @@ const sidebarItems: SidebarEntry[] = [
       { path: '/users?tab=roles', label: 'Roles & Permissions', icon: Shield },
     ],
   },
-  { path: '/countries', label: 'Country Master', icon: Globe },
+  {
+    label: 'Master Config',
+    icon: Database,
+    basePath: '/master',
+    children: [
+      { path: '/countries', label: 'Country Master', icon: Globe },
+      { path: '/app-languages', label: 'App Languages Master', icon: Languages },
+    ],
+  },
   {
     label: 'Translations',
     icon: Languages,
@@ -57,7 +66,7 @@ const sidebarItems: SidebarEntry[] = [
       { path: '/translations?tab=notifications', label: 'Notifications', icon: Bell },
     ],
   },
-  { path: '/global-configs', label: 'App Genral Config', icon: Settings },
+  { path: '/releases', label: 'App Release History', icon: Smartphone },
   { path: '/audit-logs', label: 'Audit Logs', icon: FileText },
 ];
 
@@ -71,7 +80,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
     sidebarItems.forEach((item) => {
-      if (isGroup(item) && location.pathname.startsWith(item.basePath)) {
+      if (
+        isGroup(item) &&
+        (location.pathname.startsWith(item.basePath) ||
+          item.children.some((child) => location.pathname === child.path.split('?')[0]))
+      ) {
         initial.add(item.label);
       }
     });
@@ -87,7 +100,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     });
   };
 
-  const isGroupActive = (group: NavGroup) => location.pathname.startsWith(group.basePath);
+  const isGroupActive = (group: NavGroup) =>
+    location.pathname.startsWith(group.basePath) ||
+    group.children.some((child) => location.pathname === child.path.split('?')[0]);
 
   const isChildActive = (child: NavItem) => {
     const [childPath, childQuery] = child.path.split('?');

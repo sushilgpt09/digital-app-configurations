@@ -33,8 +33,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<RoleResponse> getAllRoles(String search, String status, int page, int size) {
-        Role.Status statusEnum = status != null ? Role.Status.valueOf(status) : null;
-        Page<Role> rolePage = roleRepository.findAllWithFilters(search, statusEnum, PageRequest.of(page, size));
+        Page<Role> rolePage = roleRepository.findAllWithFilters(search, status, PageRequest.of(page, size));
         var content = rolePage.getContent().stream().map(this::toResponse).collect(Collectors.toList());
         return PagedResponse.from(rolePage, content);
     }

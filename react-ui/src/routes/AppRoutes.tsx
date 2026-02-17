@@ -6,8 +6,9 @@ import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { UserListPage } from '../pages/users/UserListPage';
 import { CountryListPage } from '../pages/countries/CountryListPage';
 import { TranslationListPage } from '../pages/translations/TranslationListPage';
-import { GlobalConfigListPage } from '../pages/globalConfigs/GlobalConfigListPage';
+import { ReleaseHistoryPage } from '../pages/releases/ReleaseHistoryPage';
 import { AuditLogPage } from '../pages/audit/AuditLogPage';
+import { AppLanguageListPage } from '../pages/appLanguages/AppLanguageListPage';
 
 export function AppRoutes() {
   return (
@@ -27,10 +28,11 @@ export function AppRoutes() {
         <Route path="roles" element={<Navigate to="/users" replace />} />
         <Route path="permissions" element={<Navigate to="/users" replace />} />
         <Route path="countries" element={<CountryListPage />} />
+        <Route path="app-languages" element={<AppLanguageListPage />} />
         <Route path="translations" element={<TranslationListPage />} />
         <Route path="messages" element={<Navigate to="/translations" replace />} />
         <Route path="notifications" element={<Navigate to="/translations" replace />} />
-        <Route path="global-configs" element={<GlobalConfigListPage />} />
+        <Route path="releases" element={<ReleaseHistoryPage />} />
         <Route path="audit-logs" element={<AuditLogPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

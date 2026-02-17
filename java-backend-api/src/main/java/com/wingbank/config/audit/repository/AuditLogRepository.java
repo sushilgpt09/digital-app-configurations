@@ -14,19 +14,28 @@ import java.util.UUID;
 @Repository
 public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
 
-    @Query("SELECT a FROM AuditLog a WHERE " +
-           "(:search IS NULL OR LOWER(a.userEmail) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(a.action) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(a.entityType) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:entityType IS NULL OR a.entityType = :entityType) " +
-           "AND (:action IS NULL OR a.action = :action) " +
-           "AND (:from IS NULL OR a.createdAt >= :from) " +
-           "AND (:to IS NULL OR a.createdAt <= :to) " +
-           "ORDER BY a.createdAt DESC")
+    @Query(value = "SELECT * FROM audit_logs WHERE " +
+           "(:search IS NULL OR LOWER(user_email) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(action) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(entity_type) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:entityType IS NULL OR entity_type = CAST(:entityType AS TEXT)) " +
+           "AND (:action IS NULL OR action = CAST(:action AS TEXT)) " +
+           "AND (CAST(:fromDate AS TIMESTAMP) IS NULL OR created_at >= CAST(:fromDate AS TIMESTAMP)) " +
+           "AND (CAST(:toDate AS TIMESTAMP) IS NULL OR created_at <= CAST(:toDate AS TIMESTAMP)) " +
+           "ORDER BY created_at DESC",
+           countQuery = "SELECT COUNT(*) FROM audit_logs WHERE " +
+           "(:search IS NULL OR LOWER(user_email) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(action) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(entity_type) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:entityType IS NULL OR entity_type = CAST(:entityType AS TEXT)) " +
+           "AND (:action IS NULL OR action = CAST(:action AS TEXT)) " +
+           "AND (CAST(:fromDate AS TIMESTAMP) IS NULL OR created_at >= CAST(:fromDate AS TIMESTAMP)) " +
+           "AND (CAST(:toDate AS TIMESTAMP) IS NULL OR created_at <= CAST(:toDate AS TIMESTAMP))",
+           nativeQuery = true)
     Page<AuditLog> findAllWithFilters(@Param("search") String search,
                                        @Param("entityType") String entityType,
                                        @Param("action") String action,
-                                       @Param("from") LocalDateTime from,
-                                       @Param("to") LocalDateTime to,
+                                       @Param("fromDate") LocalDateTime from,
+                                       @Param("toDate") LocalDateTime to,
                                        Pageable pageable);
 }

@@ -30,8 +30,7 @@ public class GlobalConfigServiceImpl implements GlobalConfigService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<GlobalConfigResponse> getAllConfigs(String search, String platform, String status, int page, int size) {
-        GlobalConfig.Status statusEnum = status != null ? GlobalConfig.Status.valueOf(status) : null;
-        Page<GlobalConfig> configPage = globalConfigRepository.findAllWithFilters(search, platform, statusEnum, PageRequest.of(page, size));
+        Page<GlobalConfig> configPage = globalConfigRepository.findAllWithFilters(search, platform, status, PageRequest.of(page, size));
         var content = configPage.getContent().stream().map(this::toResponse).collect(Collectors.toList());
         return PagedResponse.from(configPage, content);
     }

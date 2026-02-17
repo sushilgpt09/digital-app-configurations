@@ -20,13 +20,19 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
 
     List<NotificationTemplate> findByStatus(NotificationTemplate.Status status);
 
-    @Query("SELECT n FROM NotificationTemplate n WHERE " +
-           "(:search IS NULL OR LOWER(n.code) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(n.titleEn) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:type IS NULL OR n.type = :type) " +
-           "AND (:status IS NULL OR n.status = :status)")
+    @Query(value = "SELECT * FROM notification_templates WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(title_en) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:type IS NULL OR type = CAST(:type AS TEXT)) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           countQuery = "SELECT COUNT(*) FROM notification_templates WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(title_en) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:type IS NULL OR type = CAST(:type AS TEXT)) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           nativeQuery = true)
     Page<NotificationTemplate> findAllWithFilters(@Param("search") String search,
-                                                    @Param("type") NotificationTemplate.NotificationType type,
-                                                    @Param("status") NotificationTemplate.Status status,
+                                                    @Param("type") String type,
+                                                    @Param("status") String status,
                                                     Pageable pageable);
 }

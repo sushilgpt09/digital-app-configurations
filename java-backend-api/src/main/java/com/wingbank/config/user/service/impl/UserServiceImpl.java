@@ -35,8 +35,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<UserResponse> getAllUsers(String search, String status, int page, int size) {
-        User.Status statusEnum = status != null ? User.Status.valueOf(status) : null;
-        Page<User> userPage = userRepository.findAllWithFilters(search, statusEnum, PageRequest.of(page, size));
+        Page<User> userPage = userRepository.findAllWithFilters(search, status, PageRequest.of(page, size));
         var content = userPage.getContent().stream().map(this::toResponse).collect(Collectors.toList());
         return PagedResponse.from(userPage, content);
     }

@@ -21,11 +21,16 @@ public interface ApiMessageRepository extends JpaRepository<ApiMessage, UUID> {
 
     List<ApiMessage> findByType(ApiMessage.MessageType type);
 
-    @Query("SELECT m FROM ApiMessage m WHERE " +
-           "(:search IS NULL OR LOWER(m.errorCode) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(m.enMessage) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:type IS NULL OR m.type = :type)")
+    @Query(value = "SELECT * FROM api_messages WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(error_code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(en_message) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:type IS NULL OR type = CAST(:type AS TEXT))",
+           countQuery = "SELECT COUNT(*) FROM api_messages WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(error_code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(en_message) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:type IS NULL OR type = CAST(:type AS TEXT))",
+           nativeQuery = true)
     Page<ApiMessage> findAllWithFilters(@Param("search") String search,
-                                         @Param("type") ApiMessage.MessageType type,
+                                         @Param("type") String type,
                                          Pageable pageable);
 }

@@ -14,11 +14,17 @@ import java.util.UUID;
 @Repository
 public interface TranslationRepository extends JpaRepository<Translation, UUID> {
 
-    @Query("SELECT t FROM Translation t WHERE " +
-           "(:search IS NULL OR LOWER(t.key) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(t.enValue) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:module IS NULL OR t.module = :module) " +
-           "AND (:platform IS NULL OR t.platform = :platform OR t.platform = 'ALL')")
+    @Query(value = "SELECT * FROM translations WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(key) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(en_value) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:module IS NULL OR module = CAST(:module AS TEXT)) " +
+           "AND (:platform IS NULL OR platform = CAST(:platform AS TEXT) OR platform = 'ALL')",
+           countQuery = "SELECT COUNT(*) FROM translations WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(key) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(en_value) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:module IS NULL OR module = CAST(:module AS TEXT)) " +
+           "AND (:platform IS NULL OR platform = CAST(:platform AS TEXT) OR platform = 'ALL')",
+           nativeQuery = true)
     Page<Translation> findAllWithFilters(@Param("search") String search,
                                           @Param("module") String module,
                                           @Param("platform") String platform,

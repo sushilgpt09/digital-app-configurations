@@ -28,9 +28,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<NotificationTemplateResponse> getAllTemplates(String search, String type, String status, int page, int size) {
-        NotificationTemplate.NotificationType typeEnum = type != null ? NotificationTemplate.NotificationType.valueOf(type) : null;
-        NotificationTemplate.Status statusEnum = status != null ? NotificationTemplate.Status.valueOf(status) : null;
-        Page<NotificationTemplate> templatePage = notificationTemplateRepository.findAllWithFilters(search, typeEnum, statusEnum, PageRequest.of(page, size));
+        Page<NotificationTemplate> templatePage = notificationTemplateRepository.findAllWithFilters(search, type, status, PageRequest.of(page, size));
         var content = templatePage.getContent().stream().map(this::toResponse).collect(Collectors.toList());
         return PagedResponse.from(templatePage, content);
     }

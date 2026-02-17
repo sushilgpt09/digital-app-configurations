@@ -21,11 +21,16 @@ public interface RoleRepository extends JpaRepository<Role, UUID> {
 
     Set<Role> findByIdIn(Set<UUID> ids);
 
-    @Query("SELECT r FROM Role r WHERE " +
-           "(:search IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(r.description) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:status IS NULL OR r.status = :status)")
+    @Query(value = "SELECT * FROM roles WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(name) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(description) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           countQuery = "SELECT COUNT(*) FROM roles WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(name) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(description) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           nativeQuery = true)
     Page<Role> findAllWithFilters(@Param("search") String search,
-                                  @Param("status") Role.Status status,
+                                  @Param("status") String status,
                                   Pageable pageable);
 }

@@ -21,10 +21,15 @@ public interface PermissionRepository extends JpaRepository<Permission, UUID> {
 
     List<Permission> findByModule(String module);
 
-    @Query("SELECT p FROM Permission p WHERE " +
-           "(:search IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.module) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:module IS NULL OR p.module = :module)")
+    @Query(value = "SELECT * FROM permissions WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(name) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(module) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:module IS NULL OR module = CAST(:module AS TEXT))",
+           countQuery = "SELECT COUNT(*) FROM permissions WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(name) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(module) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:module IS NULL OR module = CAST(:module AS TEXT))",
+           nativeQuery = true)
     Page<Permission> findAllWithFilters(@Param("search") String search,
                                         @Param("module") String module,
                                         Pageable pageable);

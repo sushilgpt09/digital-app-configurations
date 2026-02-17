@@ -18,11 +18,16 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE " +
-           "(:search IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:status IS NULL OR u.status = :status)")
+    @Query(value = "SELECT * FROM users WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(full_name) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(email) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           countQuery = "SELECT COUNT(*) FROM users WHERE deleted = false " +
+           "AND (:search IS NULL OR LOWER(full_name) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(email) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           nativeQuery = true)
     Page<User> findAllWithFilters(@Param("search") String search,
-                                  @Param("status") User.Status status,
+                                  @Param("status") String status,
                                   Pageable pageable);
 }
