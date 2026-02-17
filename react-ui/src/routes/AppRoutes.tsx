@@ -9,6 +9,9 @@ import { TranslationListPage } from '../pages/translations/TranslationListPage';
 import { ReleaseHistoryPage } from '../pages/releases/ReleaseHistoryPage';
 import { AuditLogPage } from '../pages/audit/AuditLogPage';
 import { AppLanguageListPage } from '../pages/appLanguages/AppLanguageListPage';
+import { BakongSenderConfigPage } from '../pages/bakong/BakongSenderConfigPage';
+import { BakongReceiverConfigPage } from '../pages/bakong/BakongReceiverConfigPage';
+import { RoleFormPage } from '../pages/roles/RoleFormPage';
 
 export function AppRoutes() {
   return (
@@ -25,13 +28,17 @@ export function AppRoutes() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="users" element={<UserListPage />} />
-        <Route path="roles" element={<Navigate to="/users" replace />} />
+        <Route path="roles/new" element={<RoleFormPage />} />
+        <Route path="roles/:id/edit" element={<RoleFormPage />} />
+        <Route path="roles" element={<Navigate to="/users?tab=roles" replace />} />
         <Route path="permissions" element={<Navigate to="/users" replace />} />
         <Route path="countries" element={<CountryListPage />} />
         <Route path="app-languages" element={<AppLanguageListPage />} />
         <Route path="translations" element={<TranslationListPage />} />
         <Route path="messages" element={<Navigate to="/translations" replace />} />
         <Route path="notifications" element={<Navigate to="/translations" replace />} />
+        <Route path="bakong/sender" element={<BakongSenderConfigPage />} />
+        <Route path="bakong/receiver" element={<BakongReceiverConfigPage />} />
         <Route path="releases" element={<ReleaseHistoryPage />} />
         <Route path="audit-logs" element={<AuditLogPage />} />
       </Route>

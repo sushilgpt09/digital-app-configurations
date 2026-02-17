@@ -15,6 +15,9 @@ import {
   Bell,
   Type,
   Database,
+  Landmark,
+  Send,
+  Download,
 } from 'lucide-react';
 
 type NavItem = {
@@ -64,6 +67,15 @@ const sidebarItems: SidebarEntry[] = [
       { path: '/translations?tab=localized', label: 'Localized Strings', icon: Type },
       { path: '/translations?tab=api_messages', label: 'API Responses', icon: MessageSquare },
       { path: '/translations?tab=notifications', label: 'Notifications', icon: Bell },
+    ],
+  },
+  {
+    label: 'Bakong Integration',
+    icon: Landmark,
+    basePath: '/bakong',
+    children: [
+      { path: '/bakong/sender', label: 'Sender Config', icon: Send },
+      { path: '/bakong/receiver', label: 'Receiver Config', icon: Download },
     ],
   },
   { path: '/releases', label: 'App Release History', icon: Smartphone },

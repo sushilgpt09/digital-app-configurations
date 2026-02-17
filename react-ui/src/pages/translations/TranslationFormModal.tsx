@@ -4,20 +4,39 @@ import { InputField } from '../../components/forms/InputField';
 import { SelectField } from '../../components/forms/SelectField';
 import { TextAreaField } from '../../components/forms/TextAreaField';
 import { Translation, TranslationRequest } from '../../types/translation.types';
+import { AppLanguage } from '../../types/appLanguage.types';
 import { translationsApi } from '../../api/translations.api';
 import toast from 'react-hot-toast';
 
-interface Props { isOpen: boolean; onClose: () => void; onSuccess: () => void; item?: Translation | null; }
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  item?: Translation | null;
+  languages: AppLanguage[];
+}
 
-export function TranslationFormModal({ isOpen, onClose, onSuccess, item }: Props) {
-  const [form, setForm] = useState<TranslationRequest>({ key: '', enValue: '', kmValue: '', module: '', version: '1.0', platform: 'ALL' });
+const langFieldKey = (code: string) => `${code.toLowerCase()}Value`;
+
+export function TranslationFormModal({ isOpen, onClose, onSuccess, item, languages }: Props) {
+  const [form, setForm] = useState<TranslationRequest>({ key: '', module: '', version: '1.0', platform: 'ALL' });
   const [loading, setLoading] = useState(false);
   const isEdit = !!item;
 
   useEffect(() => {
-    if (item) setForm({ key: item.key, enValue: item.enValue, kmValue: item.kmValue, module: item.module, version: item.version, platform: item.platform });
-    else setForm({ key: '', enValue: '', kmValue: '', module: '', version: '1.0', platform: 'ALL' });
-  }, [item, isOpen]);
+    if (item) {
+      const data: TranslationRequest = { key: item.key, module: item.module, version: item.version, platform: item.platform };
+      languages.forEach((lang) => {
+        const fk = langFieldKey(lang.code);
+        data[fk] = item[fk] || '';
+      });
+      setForm(data);
+    } else {
+      const data: TranslationRequest = { key: '', module: '', version: '1.0', platform: 'ALL' };
+      languages.forEach((lang) => { data[langFieldKey(lang.code)] = ''; });
+      setForm(data);
+    }
+  }, [item, isOpen, languages]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -34,8 +53,18 @@ export function TranslationFormModal({ isOpen, onClose, onSuccess, item }: Props
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Translation' : 'Add Translation'} size="lg">
       <form onSubmit={handleSubmit}>
         <InputField label="Translation Key" value={form.key} onChange={(e) => setForm({ ...form, key: e.target.value })} placeholder="e.g. app.welcome" required />
-        <TextAreaField label="English Value" value={form.enValue || ''} onChange={(e) => setForm({ ...form, enValue: e.target.value })} placeholder="English text" />
-        <TextAreaField label="Khmer Value" value={form.kmValue || ''} onChange={(e) => setForm({ ...form, kmValue: e.target.value })} placeholder="ខ្មែរ" />
+        {languages.map((lang) => {
+          const fk = langFieldKey(lang.code);
+          return (
+            <TextAreaField
+              key={lang.id}
+              label={`${lang.name} Value`}
+              value={String(form[fk] || '')}
+              onChange={(e) => setForm({ ...form, [fk]: e.target.value })}
+              placeholder={lang.nativeName || lang.name}
+            />
+          );
+        })}
         <div className="grid grid-cols-3 gap-4">
           <InputField label="Module" value={form.module || ''} onChange={(e) => setForm({ ...form, module: e.target.value })} placeholder="GENERAL" />
           <InputField label="Version" value={form.version || '1.0'} onChange={(e) => setForm({ ...form, version: e.target.value })} />

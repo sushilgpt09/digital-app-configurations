@@ -4,24 +4,43 @@ import { InputField } from '../../components/forms/InputField';
 import { SelectField } from '../../components/forms/SelectField';
 import { TextAreaField } from '../../components/forms/TextAreaField';
 import { ApiMessageItem, ApiMessageRequest } from '../../types/message.types';
+import { AppLanguage } from '../../types/appLanguage.types';
 import { messagesApi } from '../../api/messages.api';
 import toast from 'react-hot-toast';
 
-interface Props { isOpen: boolean; onClose: () => void; onSuccess: () => void; item?: ApiMessageItem | null; }
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  item?: ApiMessageItem | null;
+  languages: AppLanguage[];
+}
 
-export function MessageFormModal({ isOpen, onClose, onSuccess, item }: Props) {
-  const [form, setForm] = useState<ApiMessageRequest>({ errorCode: '', enMessage: '', kmMessage: '', type: 'ERROR', httpStatus: 400 });
+const langFieldKey = (code: string) => `${code.toLowerCase()}Message`;
+
+export function MessageFormModal({ isOpen, onClose, onSuccess, item, languages }: Props) {
+  const [form, setForm] = useState<ApiMessageRequest>({ errorCode: '', type: 'ERROR', httpStatus: 400 });
   const [loading, setLoading] = useState(false);
   const isEdit = !!item;
 
   useEffect(() => {
-    if (item) setForm({ errorCode: item.errorCode, enMessage: item.enMessage, kmMessage: item.kmMessage, type: item.type, httpStatus: item.httpStatus });
-    else setForm({ errorCode: '', enMessage: '', kmMessage: '', type: 'ERROR', httpStatus: 400 });
-  }, [item, isOpen]);
+    if (item) {
+      const data: ApiMessageRequest = { errorCode: item.errorCode, type: item.type, httpStatus: item.httpStatus };
+      languages.forEach((lang) => {
+        const fk = langFieldKey(lang.code);
+        data[fk] = String(item[fk] || '');
+      });
+      setForm(data);
+    } else {
+      const data: ApiMessageRequest = { errorCode: '', type: 'ERROR', httpStatus: 400 };
+      languages.forEach((lang) => { data[langFieldKey(lang.code)] = ''; });
+      setForm(data);
+    }
+  }, [item, isOpen, languages]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.errorCode.trim() || !form.enMessage.trim()) { toast.error('Code and English message are required'); return; }
+    if (!form.errorCode.trim()) { toast.error('Error code is required'); return; }
     setLoading(true);
     try {
       if (isEdit && item) { await messagesApi.update(item.id, form); toast.success('Updated'); }
@@ -34,10 +53,20 @@ export function MessageFormModal({ isOpen, onClose, onSuccess, item }: Props) {
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit API Message' : 'Add API Message'} size="lg">
       <form onSubmit={handleSubmit}>
         <InputField label="Error Code" value={form.errorCode} onChange={(e) => setForm({ ...form, errorCode: e.target.value })} placeholder="e.g. ERROR_001" required />
-        <TextAreaField label="English Message" value={form.enMessage} onChange={(e) => setForm({ ...form, enMessage: e.target.value })} required />
-        <TextAreaField label="Khmer Message" value={form.kmMessage || ''} onChange={(e) => setForm({ ...form, kmMessage: e.target.value })} />
+        {languages.map((lang) => {
+          const fk = langFieldKey(lang.code);
+          return (
+            <TextAreaField
+              key={lang.id}
+              label={`${lang.name} Message`}
+              value={String(form[fk] || '')}
+              onChange={(e) => setForm({ ...form, [fk]: e.target.value })}
+              placeholder={`${lang.name} message`}
+            />
+          );
+        })}
         <div className="grid grid-cols-2 gap-4">
-          <SelectField label="Type" value={form.type || 'ERROR'} onChange={(e) => setForm({ ...form, type: e.target.value })} options={[{ label: 'Error', value: 'ERROR' }, { label: 'Success', value: 'SUCCESS' }, { label: 'Info', value: 'INFO' }, { label: 'Warning', value: 'WARNING' }]} />
+          <SelectField label="Type" value={String(form.type || 'ERROR')} onChange={(e) => setForm({ ...form, type: e.target.value })} options={[{ label: 'Error', value: 'ERROR' }, { label: 'Success', value: 'SUCCESS' }, { label: 'Info', value: 'INFO' }, { label: 'Warning', value: 'WARNING' }]} />
           <InputField label="HTTP Status" type="number" value={String(form.httpStatus || 400)} onChange={(e) => setForm({ ...form, httpStatus: Number(e.target.value) })} />
         </div>
         <div className="flex justify-end gap-3 mt-6">

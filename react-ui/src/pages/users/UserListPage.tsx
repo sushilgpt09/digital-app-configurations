@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { usersApi } from '../../api/users.api';
 import { rolesApi } from '../../api/roles.api';
@@ -12,13 +12,13 @@ import { DataTable, Column } from '../../components/common/DataTable';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { UserFormModal } from './UserFormModal';
-import { RoleFormModal } from '../roles/RoleFormModal';
 import toast from 'react-hot-toast';
 
 type TabKey = 'users' | 'roles';
 
 export function UserListPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const tabParam = searchParams.get('tab') as TabKey | null;
   const activeTab: TabKey = tabParam && ['users', 'roles'].includes(tabParam) ? tabParam : 'users';
 
@@ -45,8 +45,6 @@ export function UserListPage() {
   const [roleStatus, setRoleStatus] = useState('');
   const [roleSearchQuery, setRoleSearchQuery] = useState('');
   const [roleStatusQuery, setRoleStatusQuery] = useState('');
-  const [showRoleForm, setShowRoleForm] = useState(false);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [deleteRoleTarget, setDeleteRoleTarget] = useState<Role | null>(null);
   const [deletingRole, setDeletingRole] = useState(false);
 
@@ -94,7 +92,7 @@ export function UserListPage() {
 
   const handleAdd = () => {
     if (activeTab === 'users') { setEditingUser(null); setShowUserForm(true); }
-    else { setEditingRole(null); setShowRoleForm(true); }
+    else { navigate('/roles/new'); }
   };
 
   return (
@@ -149,9 +147,8 @@ export function UserListPage() {
             columns={roleColumns} data={roleData.content} loading={roleLoading}
             page={roleData.page} size={roleData.size} totalElements={roleData.totalElements} totalPages={roleData.totalPages}
             onPageChange={setRolePage} onSizeChange={(s) => { setRoleSize(s); setRolePage(0); }}
-            onEdit={(r) => { setEditingRole(r); setShowRoleForm(true); }} onDelete={setDeleteRoleTarget} rowKey={(r) => r.id}
+            onEdit={(r) => navigate(`/roles/${r.id}/edit`)} onDelete={setDeleteRoleTarget} rowKey={(r) => r.id}
           />
-          <RoleFormModal isOpen={showRoleForm} onClose={() => setShowRoleForm(false)} onSuccess={fetchRoles} role={editingRole} />
           <ConfirmDialog
             isOpen={!!deleteRoleTarget} onClose={() => setDeleteRoleTarget(null)} loading={deletingRole}
             message={`Are you sure you want to delete role "${deleteRoleTarget?.name}"?`}
