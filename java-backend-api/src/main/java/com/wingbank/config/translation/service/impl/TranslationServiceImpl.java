@@ -5,6 +5,7 @@ import com.wingbank.config.common.exception.ResourceNotFoundException;
 import com.wingbank.config.translation.dto.TranslationRequest;
 import com.wingbank.config.translation.dto.TranslationResponse;
 import com.wingbank.config.translation.entity.Translation;
+import com.wingbank.config.translation.entity.TranslationValue;
 import com.wingbank.config.translation.repository.TranslationRepository;
 import com.wingbank.config.translation.service.TranslationService;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,11 +46,10 @@ public class TranslationServiceImpl implements TranslationService {
     public TranslationResponse createTranslation(TranslationRequest request) {
         Translation translation = new Translation();
         translation.setKey(request.getKey());
-        translation.setEnValue(request.getEnValue());
-        translation.setKmValue(request.getKmValue());
         translation.setModule(request.getModule());
         translation.setVersion(request.getVersion() != null ? request.getVersion() : "1.0");
         translation.setPlatform(request.getPlatform() != null ? request.getPlatform() : "ALL");
+        applyLanguageValues(translation, request.getLanguageValues());
 
         Translation saved = translationRepository.save(translation);
         log.info("Translation created: {}", saved.getKey());
@@ -66,8 +63,6 @@ public class TranslationServiceImpl implements TranslationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Translation", "id", id));
 
         translation.setKey(request.getKey());
-        translation.setEnValue(request.getEnValue());
-        translation.setKmValue(request.getKmValue());
         translation.setModule(request.getModule());
         if (request.getVersion() != null) {
             translation.setVersion(request.getVersion());
@@ -75,6 +70,7 @@ public class TranslationServiceImpl implements TranslationService {
         if (request.getPlatform() != null) {
             translation.setPlatform(request.getPlatform());
         }
+        applyLanguageValues(translation, request.getLanguageValues());
 
         Translation saved = translationRepository.save(translation);
         log.info("Translation updated: {}", saved.getKey());
@@ -101,11 +97,10 @@ public class TranslationServiceImpl implements TranslationService {
 
         Map<String, String> result = new LinkedHashMap<>();
         for (Translation t : translations) {
-            String value;
-            if ("km".equalsIgnoreCase(lang)) {
-                value = t.getKmValue() != null ? t.getKmValue() : t.getEnValue();
-            } else {
-                value = t.getEnValue() != null ? t.getEnValue() : t.getKmValue();
+            // Find value for requested language, fallback to 'en'
+            String value = getValueForLang(t, lang);
+            if (value == null) {
+                value = getValueForLang(t, "en");
             }
             if (value != null) {
                 result.put(t.getKey(), value);
@@ -114,17 +109,64 @@ public class TranslationServiceImpl implements TranslationService {
         return result;
     }
 
+    private String getValueForLang(Translation t, String lang) {
+        if (t.getValues() == null) return null;
+        return t.getValues().stream()
+                .filter(v -> v.getLanguageCode().equalsIgnoreCase(lang))
+                .map(TranslationValue::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Apply language values from request to entity.
+     * Request map keys are like "enValue", "kmValue" → extract lang code from prefix.
+     */
+    private void applyLanguageValues(Translation translation, Map<String, String> langValues) {
+        if (langValues == null || langValues.isEmpty()) return;
+
+        Map<String, TranslationValue> existing = new HashMap<>();
+        for (TranslationValue v : translation.getValues()) {
+            existing.put(v.getLanguageCode(), v);
+        }
+
+        for (Map.Entry<String, String> entry : langValues.entrySet()) {
+            // "enValue" → "en", "kmValue" → "km"
+            String fieldName = entry.getKey();
+            if (!fieldName.endsWith("Value")) continue;
+            String langCode = fieldName.substring(0, fieldName.length() - 5); // strip "Value"
+
+            TranslationValue tv = existing.get(langCode);
+            if (tv != null) {
+                tv.setValue(entry.getValue());
+            } else {
+                TranslationValue newTv = new TranslationValue();
+                newTv.setTranslation(translation);
+                newTv.setLanguageCode(langCode);
+                newTv.setValue(entry.getValue());
+                translation.getValues().add(newTv);
+            }
+        }
+    }
+
     private TranslationResponse toResponse(Translation translation) {
+        Map<String, String> langMap = new HashMap<>();
+        if (translation.getValues() != null) {
+            for (TranslationValue v : translation.getValues()) {
+                // "en" → "enValue", "km" → "kmValue"
+                langMap.put(v.getLanguageCode() + "Value", v.getValue());
+            }
+        }
+
         return TranslationResponse.builder()
                 .id(translation.getId())
                 .key(translation.getKey())
-                .enValue(translation.getEnValue())
-                .kmValue(translation.getKmValue())
                 .module(translation.getModule())
                 .version(translation.getVersion())
                 .platform(translation.getPlatform())
                 .createdAt(translation.getCreatedAt())
                 .updatedAt(translation.getUpdatedAt())
+                .languageValues(langMap)
                 .build();
     }
 }

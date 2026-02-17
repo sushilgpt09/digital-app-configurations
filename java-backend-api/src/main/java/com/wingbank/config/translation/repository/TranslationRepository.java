@@ -14,16 +14,20 @@ import java.util.UUID;
 @Repository
 public interface TranslationRepository extends JpaRepository<Translation, UUID> {
 
-    @Query(value = "SELECT * FROM translations WHERE deleted = false " +
-           "AND (:search IS NULL OR LOWER(key) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
-           "OR LOWER(en_value) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
-           "AND (:module IS NULL OR module = CAST(:module AS TEXT)) " +
-           "AND (:platform IS NULL OR platform = CAST(:platform AS TEXT) OR platform = 'ALL')",
-           countQuery = "SELECT COUNT(*) FROM translations WHERE deleted = false " +
-           "AND (:search IS NULL OR LOWER(key) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
-           "OR LOWER(en_value) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
-           "AND (:module IS NULL OR module = CAST(:module AS TEXT)) " +
-           "AND (:platform IS NULL OR platform = CAST(:platform AS TEXT) OR platform = 'ALL')",
+    @Query(value = "SELECT DISTINCT t.* FROM translations t " +
+           "LEFT JOIN translation_values tv ON t.id = tv.translation_id " +
+           "WHERE t.deleted = false " +
+           "AND (:search IS NULL OR LOWER(t.key) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(tv.value) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:module IS NULL OR t.module = CAST(:module AS TEXT)) " +
+           "AND (:platform IS NULL OR t.platform = CAST(:platform AS TEXT) OR t.platform = 'ALL')",
+           countQuery = "SELECT COUNT(DISTINCT t.id) FROM translations t " +
+           "LEFT JOIN translation_values tv ON t.id = tv.translation_id " +
+           "WHERE t.deleted = false " +
+           "AND (:search IS NULL OR LOWER(t.key) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(tv.value) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:module IS NULL OR t.module = CAST(:module AS TEXT)) " +
+           "AND (:platform IS NULL OR t.platform = CAST(:platform AS TEXT) OR t.platform = 'ALL')",
            nativeQuery = true)
     Page<Translation> findAllWithFilters(@Param("search") String search,
                                           @Param("module") String module,

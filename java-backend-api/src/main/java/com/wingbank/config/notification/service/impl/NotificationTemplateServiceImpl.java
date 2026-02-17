@@ -6,6 +6,7 @@ import com.wingbank.config.common.exception.ResourceNotFoundException;
 import com.wingbank.config.notification.dto.NotificationTemplateRequest;
 import com.wingbank.config.notification.dto.NotificationTemplateResponse;
 import com.wingbank.config.notification.entity.NotificationTemplate;
+import com.wingbank.config.notification.entity.NotificationTemplateValue;
 import com.wingbank.config.notification.repository.NotificationTemplateRepository;
 import com.wingbank.config.notification.service.NotificationTemplateService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,12 +51,9 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
 
         NotificationTemplate template = new NotificationTemplate();
         template.setCode(request.getCode());
-        template.setTitleEn(request.getTitleEn());
-        template.setTitleKm(request.getTitleKm());
-        template.setBodyEn(request.getBodyEn());
-        template.setBodyKm(request.getBodyKm());
         template.setType(NotificationTemplate.NotificationType.valueOf(request.getType()));
         template.setStatus(request.getStatus() != null ? NotificationTemplate.Status.valueOf(request.getStatus()) : NotificationTemplate.Status.ACTIVE);
+        applyLanguageValues(template, request.getLanguageValues());
 
         NotificationTemplate saved = notificationTemplateRepository.save(template);
         log.info("NotificationTemplate created: {}", saved.getCode());
@@ -73,16 +71,13 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         }
 
         template.setCode(request.getCode());
-        template.setTitleEn(request.getTitleEn());
-        template.setTitleKm(request.getTitleKm());
-        template.setBodyEn(request.getBodyEn());
-        template.setBodyKm(request.getBodyKm());
         if (request.getType() != null) {
             template.setType(NotificationTemplate.NotificationType.valueOf(request.getType()));
         }
         if (request.getStatus() != null) {
             template.setStatus(NotificationTemplate.Status.valueOf(request.getStatus()));
         }
+        applyLanguageValues(template, request.getLanguageValues());
 
         NotificationTemplate saved = notificationTemplateRepository.save(template);
         log.info("NotificationTemplate updated: {}", saved.getCode());
@@ -99,18 +94,79 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         log.info("NotificationTemplate soft deleted: {}", template.getCode());
     }
 
+    /**
+     * Apply language values from request to entity.
+     * Request map keys are like "titleEn", "bodyKm" → extract prefix (title/body) and lang code.
+     */
+    private void applyLanguageValues(NotificationTemplate template, Map<String, String> langValues) {
+        if (langValues == null || langValues.isEmpty()) return;
+
+        // Collect title/body per language code
+        Map<String, String> titles = new HashMap<>();
+        Map<String, String> bodies = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : langValues.entrySet()) {
+            String fieldName = entry.getKey();
+            if (fieldName.startsWith("title") && fieldName.length() > 5) {
+                // "titleEn" → lang code "en" (lowercase first char)
+                String langCode = fieldName.substring(5, 6).toLowerCase() + fieldName.substring(6);
+                titles.put(langCode, entry.getValue());
+            } else if (fieldName.startsWith("body") && fieldName.length() > 4) {
+                // "bodyEn" → lang code "en"
+                String langCode = fieldName.substring(4, 5).toLowerCase() + fieldName.substring(5);
+                bodies.put(langCode, entry.getValue());
+            }
+        }
+
+        // Merge all language codes
+        Set<String> allLangs = new HashSet<>();
+        allLangs.addAll(titles.keySet());
+        allLangs.addAll(bodies.keySet());
+
+        Map<String, NotificationTemplateValue> existing = new HashMap<>();
+        for (NotificationTemplateValue v : template.getValues()) {
+            existing.put(v.getLanguageCode(), v);
+        }
+
+        for (String langCode : allLangs) {
+            NotificationTemplateValue tv = existing.get(langCode);
+            if (tv != null) {
+                if (titles.containsKey(langCode)) tv.setTitle(titles.get(langCode));
+                if (bodies.containsKey(langCode)) tv.setBody(bodies.get(langCode));
+            } else {
+                NotificationTemplateValue newTv = new NotificationTemplateValue();
+                newTv.setNotificationTemplate(template);
+                newTv.setLanguageCode(langCode);
+                newTv.setTitle(titles.get(langCode));
+                newTv.setBody(bodies.get(langCode));
+                template.getValues().add(newTv);
+            }
+        }
+    }
+
     private NotificationTemplateResponse toResponse(NotificationTemplate template) {
+        Map<String, String> langMap = new HashMap<>();
+        if (template.getValues() != null) {
+            for (NotificationTemplateValue v : template.getValues()) {
+                // "en" → "titleEn", "bodyEn"
+                String cap = v.getLanguageCode().substring(0, 1).toUpperCase() + v.getLanguageCode().substring(1);
+                if (v.getTitle() != null) {
+                    langMap.put("title" + cap, v.getTitle());
+                }
+                if (v.getBody() != null) {
+                    langMap.put("body" + cap, v.getBody());
+                }
+            }
+        }
+
         return NotificationTemplateResponse.builder()
                 .id(template.getId())
                 .code(template.getCode())
-                .titleEn(template.getTitleEn())
-                .titleKm(template.getTitleKm())
-                .bodyEn(template.getBodyEn())
-                .bodyKm(template.getBodyKm())
                 .type(template.getType().name())
                 .status(template.getStatus().name())
                 .createdAt(template.getCreatedAt())
                 .updatedAt(template.getUpdatedAt())
+                .languageValues(langMap)
                 .build();
     }
 }

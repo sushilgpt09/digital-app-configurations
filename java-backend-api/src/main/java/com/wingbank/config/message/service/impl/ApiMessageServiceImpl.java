@@ -6,6 +6,7 @@ import com.wingbank.config.common.exception.ResourceNotFoundException;
 import com.wingbank.config.message.dto.ApiMessageRequest;
 import com.wingbank.config.message.dto.ApiMessageResponse;
 import com.wingbank.config.message.entity.ApiMessage;
+import com.wingbank.config.message.entity.ApiMessageValue;
 import com.wingbank.config.message.repository.ApiMessageRepository;
 import com.wingbank.config.message.service.ApiMessageService;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,10 +51,9 @@ public class ApiMessageServiceImpl implements ApiMessageService {
 
         ApiMessage message = new ApiMessage();
         message.setErrorCode(request.getErrorCode());
-        message.setEnMessage(request.getEnMessage());
-        message.setKmMessage(request.getKmMessage());
         message.setType(request.getType() != null ? ApiMessage.MessageType.valueOf(request.getType()) : ApiMessage.MessageType.ERROR);
         message.setHttpStatus(request.getHttpStatus() != null ? request.getHttpStatus() : 400);
+        applyLanguageValues(message, request.getLanguageValues());
 
         ApiMessage saved = apiMessageRepository.save(message);
         log.info("ApiMessage created: {}", saved.getErrorCode());
@@ -74,14 +71,13 @@ public class ApiMessageServiceImpl implements ApiMessageService {
         }
 
         message.setErrorCode(request.getErrorCode());
-        message.setEnMessage(request.getEnMessage());
-        message.setKmMessage(request.getKmMessage());
         if (request.getType() != null) {
             message.setType(ApiMessage.MessageType.valueOf(request.getType()));
         }
         if (request.getHttpStatus() != null) {
             message.setHttpStatus(request.getHttpStatus());
         }
+        applyLanguageValues(message, request.getLanguageValues());
 
         ApiMessage saved = apiMessageRepository.save(message);
         log.info("ApiMessage updated: {}", saved.getErrorCode());
@@ -104,11 +100,9 @@ public class ApiMessageServiceImpl implements ApiMessageService {
         List<ApiMessage> messages = apiMessageRepository.findAll();
         Map<String, String> result = new LinkedHashMap<>();
         for (ApiMessage m : messages) {
-            String value;
-            if ("km".equalsIgnoreCase(lang)) {
-                value = m.getKmMessage() != null ? m.getKmMessage() : m.getEnMessage();
-            } else {
-                value = m.getEnMessage() != null ? m.getEnMessage() : m.getKmMessage();
+            String value = getValueForLang(m, lang);
+            if (value == null) {
+                value = getValueForLang(m, "en");
             }
             if (value != null) {
                 result.put(m.getErrorCode(), value);
@@ -117,16 +111,61 @@ public class ApiMessageServiceImpl implements ApiMessageService {
         return result;
     }
 
+    private String getValueForLang(ApiMessage m, String lang) {
+        if (m.getValues() == null) return null;
+        return m.getValues().stream()
+                .filter(v -> v.getLanguageCode().equalsIgnoreCase(lang))
+                .map(ApiMessageValue::getMessage)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Apply language values from request to entity.
+     * Request map keys are like "enMessage", "kmMessage" → extract lang code from prefix.
+     */
+    private void applyLanguageValues(ApiMessage message, Map<String, String> langValues) {
+        if (langValues == null || langValues.isEmpty()) return;
+
+        Map<String, ApiMessageValue> existing = new HashMap<>();
+        for (ApiMessageValue v : message.getValues()) {
+            existing.put(v.getLanguageCode(), v);
+        }
+
+        for (Map.Entry<String, String> entry : langValues.entrySet()) {
+            String fieldName = entry.getKey();
+            if (!fieldName.endsWith("Message")) continue;
+            String langCode = fieldName.substring(0, fieldName.length() - 7); // strip "Message"
+
+            ApiMessageValue mv = existing.get(langCode);
+            if (mv != null) {
+                mv.setMessage(entry.getValue());
+            } else {
+                ApiMessageValue newMv = new ApiMessageValue();
+                newMv.setApiMessage(message);
+                newMv.setLanguageCode(langCode);
+                newMv.setMessage(entry.getValue());
+                message.getValues().add(newMv);
+            }
+        }
+    }
+
     private ApiMessageResponse toResponse(ApiMessage message) {
+        Map<String, String> langMap = new HashMap<>();
+        if (message.getValues() != null) {
+            for (ApiMessageValue v : message.getValues()) {
+                langMap.put(v.getLanguageCode() + "Message", v.getMessage());
+            }
+        }
+
         return ApiMessageResponse.builder()
                 .id(message.getId())
                 .errorCode(message.getErrorCode())
-                .enMessage(message.getEnMessage())
-                .kmMessage(message.getKmMessage())
                 .type(message.getType().name())
                 .httpStatus(message.getHttpStatus())
                 .createdAt(message.getCreatedAt())
                 .updatedAt(message.getUpdatedAt())
+                .languageValues(langMap)
                 .build();
     }
 }

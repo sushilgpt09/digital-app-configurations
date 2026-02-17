@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "translations", uniqueConstraints = @UniqueConstraint(columnNames = {"key", "platform"}))
 @SQLRestriction("deleted = false")
@@ -20,12 +23,6 @@ public class Translation extends AuditEntity {
     @Column(nullable = false)
     private String key;
 
-    @Column(name = "en_value")
-    private String enValue;
-
-    @Column(name = "km_value")
-    private String kmValue;
-
     private String module;
 
     @Column(columnDefinition = "VARCHAR(20) DEFAULT '1.0'")
@@ -33,4 +30,7 @@ public class Translation extends AuditEntity {
 
     @Column(columnDefinition = "VARCHAR(20) DEFAULT 'ALL'")
     private String platform = "ALL";
+
+    @OneToMany(mappedBy = "translation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<TranslationValue> values = new ArrayList<>();
 }

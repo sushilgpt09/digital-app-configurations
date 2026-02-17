@@ -21,14 +21,18 @@ public interface ApiMessageRepository extends JpaRepository<ApiMessage, UUID> {
 
     List<ApiMessage> findByType(ApiMessage.MessageType type);
 
-    @Query(value = "SELECT * FROM api_messages WHERE deleted = false " +
-           "AND (:search IS NULL OR LOWER(error_code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
-           "OR LOWER(en_message) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
-           "AND (:type IS NULL OR type = CAST(:type AS TEXT))",
-           countQuery = "SELECT COUNT(*) FROM api_messages WHERE deleted = false " +
-           "AND (:search IS NULL OR LOWER(error_code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
-           "OR LOWER(en_message) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
-           "AND (:type IS NULL OR type = CAST(:type AS TEXT))",
+    @Query(value = "SELECT DISTINCT m.* FROM api_messages m " +
+           "LEFT JOIN api_message_values mv ON m.id = mv.message_id " +
+           "WHERE m.deleted = false " +
+           "AND (:search IS NULL OR LOWER(m.error_code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(mv.message) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:type IS NULL OR m.type = CAST(:type AS TEXT))",
+           countQuery = "SELECT COUNT(DISTINCT m.id) FROM api_messages m " +
+           "LEFT JOIN api_message_values mv ON m.id = mv.message_id " +
+           "WHERE m.deleted = false " +
+           "AND (:search IS NULL OR LOWER(m.error_code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(mv.message) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:type IS NULL OR m.type = CAST(:type AS TEXT))",
            nativeQuery = true)
     Page<ApiMessage> findAllWithFilters(@Param("search") String search,
                                          @Param("type") String type,

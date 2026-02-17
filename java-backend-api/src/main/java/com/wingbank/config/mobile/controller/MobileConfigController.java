@@ -7,9 +7,11 @@ import com.wingbank.config.country.repository.CountryRepository;
 import com.wingbank.config.globalconfig.entity.GlobalConfig;
 import com.wingbank.config.globalconfig.repository.GlobalConfigRepository;
 import com.wingbank.config.message.entity.ApiMessage;
+import com.wingbank.config.message.entity.ApiMessageValue;
 import com.wingbank.config.message.repository.ApiMessageRepository;
 import com.wingbank.config.mobile.dto.MobileConfigResponse;
 import com.wingbank.config.translation.entity.Translation;
+import com.wingbank.config.translation.entity.TranslationValue;
 import com.wingbank.config.translation.repository.TranslationRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,8 +56,11 @@ public class MobileConfigController {
                 platform.toUpperCase(), version);
         Map<String, String> translationMap = new HashMap<>();
         for (Translation t : translations) {
-            String value = "km".equals(lang) ? (t.getKmValue() != null ? t.getKmValue() : t.getEnValue()) : t.getEnValue();
-            translationMap.put(t.getKey(), value);
+            String value = getTranslationValue(t, lang);
+            if (value == null) value = getTranslationValue(t, "en");
+            if (value != null) {
+                translationMap.put(t.getKey(), value);
+            }
         }
 
         // Countries
@@ -83,8 +88,11 @@ public class MobileConfigController {
         Map<String, String> messageMap = new HashMap<>();
         for (ApiMessage m : messages) {
             if (!m.isDeleted()) {
-                String value = "km".equals(lang) && m.getKmMessage() != null ? m.getKmMessage() : m.getEnMessage();
-                messageMap.put(m.getErrorCode(), value);
+                String value = getMessageValue(m, lang);
+                if (value == null) value = getMessageValue(m, "en");
+                if (value != null) {
+                    messageMap.put(m.getErrorCode(), value);
+                }
             }
         }
 
@@ -104,5 +112,23 @@ public class MobileConfigController {
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    private String getTranslationValue(Translation t, String lang) {
+        if (t.getValues() == null) return null;
+        return t.getValues().stream()
+                .filter(v -> v.getLanguageCode().equalsIgnoreCase(lang))
+                .map(TranslationValue::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String getMessageValue(ApiMessage m, String lang) {
+        if (m.getValues() == null) return null;
+        return m.getValues().stream()
+                .filter(v -> v.getLanguageCode().equalsIgnoreCase(lang))
+                .map(ApiMessageValue::getMessage)
+                .findFirst()
+                .orElse(null);
     }
 }

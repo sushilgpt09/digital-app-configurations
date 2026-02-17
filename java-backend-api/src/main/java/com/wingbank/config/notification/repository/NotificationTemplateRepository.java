@@ -20,16 +20,20 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
 
     List<NotificationTemplate> findByStatus(NotificationTemplate.Status status);
 
-    @Query(value = "SELECT * FROM notification_templates WHERE deleted = false " +
-           "AND (:search IS NULL OR LOWER(code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
-           "OR LOWER(title_en) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
-           "AND (:type IS NULL OR type = CAST(:type AS TEXT)) " +
-           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
-           countQuery = "SELECT COUNT(*) FROM notification_templates WHERE deleted = false " +
-           "AND (:search IS NULL OR LOWER(code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
-           "OR LOWER(title_en) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
-           "AND (:type IS NULL OR type = CAST(:type AS TEXT)) " +
-           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+    @Query(value = "SELECT DISTINCT n.* FROM notification_templates n " +
+           "LEFT JOIN notification_template_values nv ON n.id = nv.template_id " +
+           "WHERE n.deleted = false " +
+           "AND (:search IS NULL OR LOWER(n.code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(nv.title) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:type IS NULL OR n.type = CAST(:type AS TEXT)) " +
+           "AND (:status IS NULL OR n.status = CAST(:status AS TEXT))",
+           countQuery = "SELECT COUNT(DISTINCT n.id) FROM notification_templates n " +
+           "LEFT JOIN notification_template_values nv ON n.id = nv.template_id " +
+           "WHERE n.deleted = false " +
+           "AND (:search IS NULL OR LOWER(n.code) LIKE LOWER('%' || CAST(:search AS TEXT) || '%') " +
+           "OR LOWER(nv.title) LIKE LOWER('%' || CAST(:search AS TEXT) || '%')) " +
+           "AND (:type IS NULL OR n.type = CAST(:type AS TEXT)) " +
+           "AND (:status IS NULL OR n.status = CAST(:status AS TEXT))",
            nativeQuery = true)
     Page<NotificationTemplate> findAllWithFilters(@Param("search") String search,
                                                     @Param("type") String type,
