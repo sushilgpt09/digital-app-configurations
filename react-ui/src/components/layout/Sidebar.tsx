@@ -18,6 +18,13 @@ import {
   Landmark,
   Send,
   Download,
+  Layers,
+  MapPin,
+  Tag,
+  Wrench,
+  Image,
+  Star,
+  Handshake,
 } from 'lucide-react';
 
 type NavItem = {
@@ -76,6 +83,19 @@ const sidebarItems: SidebarEntry[] = [
     children: [
       { path: '/bakong/sender', label: 'Sender Config', icon: Send },
       { path: '/bakong/receiver', label: 'Receiver Config', icon: Download },
+    ],
+  },
+  {
+    label: 'Wing Plus',
+    icon: Layers,
+    basePath: '/wing',
+    children: [
+      { path: '/wing/locations', label: 'Locations', icon: MapPin },
+      { path: '/wing/categories', label: 'Categories', icon: Tag },
+      { path: '/wing/services', label: 'Services', icon: Wrench },
+      { path: '/wing/banners', label: 'Banners', icon: Image },
+      { path: '/wing/popular-cards', label: 'Popular Cards', icon: Star },
+      { path: '/wing/partners', label: 'Partners', icon: Handshake },
     ],
   },
   { path: '/releases', label: 'App Release History', icon: Smartphone },

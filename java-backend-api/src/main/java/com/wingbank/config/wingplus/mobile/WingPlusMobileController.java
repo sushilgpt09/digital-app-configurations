@@ -1,0 +1,246 @@
+package com.wingbank.config.wingplus.mobile;
+
+import com.wingbank.config.common.dto.ApiResponse;
+import com.wingbank.config.wingplus.banner.entity.WingBanner;
+import com.wingbank.config.wingplus.banner.entity.WingBannerTranslation;
+import com.wingbank.config.wingplus.banner.repository.WingBannerRepository;
+import com.wingbank.config.wingplus.category.entity.WingCategory;
+import com.wingbank.config.wingplus.category.entity.WingCategoryTranslation;
+import com.wingbank.config.wingplus.category.repository.WingCategoryRepository;
+import com.wingbank.config.wingplus.location.entity.WingLocation;
+import com.wingbank.config.wingplus.location.repository.WingLocationRepository;
+import com.wingbank.config.wingplus.partner.entity.WingPartner;
+import com.wingbank.config.wingplus.partner.entity.WingPartnerTranslation;
+import com.wingbank.config.wingplus.partner.repository.WingPartnerRepository;
+import com.wingbank.config.wingplus.popularcard.entity.WingPopularCard;
+import com.wingbank.config.wingplus.popularcard.entity.WingPopularCardTranslation;
+import com.wingbank.config.wingplus.popularcard.repository.WingPopularCardRepository;
+import com.wingbank.config.wingplus.wingservice.entity.WingService;
+import com.wingbank.config.wingplus.wingservice.entity.WingServiceTranslation;
+import com.wingbank.config.wingplus.wingservice.repository.WingServiceRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/mobile/wing-plus")
+@Tag(name = "Wing+ Mobile API")
+@RequiredArgsConstructor
+public class WingPlusMobileController {
+
+    private static final String FALLBACK = "en";
+
+    private final WingLocationRepository locationRepository;
+    private final WingCategoryRepository categoryRepository;
+    private final WingServiceRepository serviceRepository;
+    private final WingBannerRepository bannerRepository;
+    private final WingPopularCardRepository popularCardRepository;
+    private final WingPartnerRepository partnerRepository;
+
+    // ── Locations ─────────────────────────────────────────────────────────────
+
+    @GetMapping("/locations")
+    @Operation(summary = "Get all active locations")
+    public ResponseEntity<ApiResponse<List<LocationDto>>> getLocations(
+            @RequestParam(defaultValue = "en") String lang) {
+        List<LocationDto> data = locationRepository
+                .findByStatusOrderBySortOrder(WingLocation.Status.ACTIVE)
+                .stream()
+                .map(l -> LocationDto.builder()
+                        .id(l.getId()).name(l.getName()).icon(l.getIcon())
+                        .sortOrder(l.getSortOrder()).build())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // ── Banners ───────────────────────────────────────────────────────────────
+
+    @GetMapping("/banners")
+    @Operation(summary = "Get all active banners (localized)")
+    public ResponseEntity<ApiResponse<List<BannerDto>>> getBanners(
+            @RequestParam(defaultValue = "en") String lang) {
+        List<BannerDto> data = bannerRepository
+                .findByStatusOrderBySortOrder(WingBanner.Status.ACTIVE)
+                .stream()
+                .map(b -> {
+                    WingBannerTranslation t = pickBannerTranslation(b.getTranslations(), lang);
+                    return BannerDto.builder()
+                            .id(b.getId())
+                            .title(t != null ? t.getTitle() : null)
+                            .subtitle(t != null ? t.getSubtitle() : null)
+                            .offerText(t != null ? t.getOfferText() : null)
+                            .imageUrl(b.getImageUrl())
+                            .gradientFrom(b.getGradientFrom())
+                            .gradientTo(b.getGradientTo())
+                            .linkUrl(b.getLinkUrl())
+                            .sortOrder(b.getSortOrder()).build();
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // ── Categories ────────────────────────────────────────────────────────────
+
+    @GetMapping("/categories")
+    @Operation(summary = "Get all active categories (localized)")
+    public ResponseEntity<ApiResponse<List<CategoryDto>>> getCategories(
+            @RequestParam(defaultValue = "en") String lang) {
+        List<CategoryDto> data = categoryRepository
+                .findByStatusOrderBySortOrder(WingCategory.Status.ACTIVE)
+                .stream()
+                .map(c -> {
+                    WingCategoryTranslation t = pickCategoryTranslation(c.getTranslations(), lang);
+                    return CategoryDto.builder()
+                            .id(c.getId()).key(c.getKey()).icon(c.getIcon())
+                            .name(t != null ? t.getName() : c.getKey())
+                            .displayName(t != null ? t.getDisplayName() : c.getKey())
+                            .sortOrder(c.getSortOrder()).build();
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // ── Services by Category ──────────────────────────────────────────────────
+
+    @GetMapping("/categories/{categoryId}/services")
+    @Operation(summary = "Get active services for a category (localized)")
+    public ResponseEntity<ApiResponse<List<ServiceDto>>> getServicesByCategory(
+            @PathVariable UUID categoryId,
+            @RequestParam(defaultValue = "en") String lang) {
+        List<ServiceDto> data = serviceRepository
+                .findByCategoryIdAndStatusOrderBySortOrder(categoryId, WingService.Status.ACTIVE)
+                .stream()
+                .map(s -> {
+                    WingServiceTranslation t = pickServiceTranslation(s.getTranslations(), lang);
+                    return ServiceDto.builder()
+                            .id(s.getId())
+                            .categoryId(s.getCategory().getId())
+                            .categoryKey(s.getCategory().getKey())
+                            .icon(s.getIcon()).imageUrl(s.getImageUrl())
+                            .title(t != null ? t.getTitle() : null)
+                            .description(t != null ? t.getDescription() : null)
+                            .sortOrder(s.getSortOrder()).build();
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // ── Popular Cards ─────────────────────────────────────────────────────────
+
+    @GetMapping("/popular-cards")
+    @Operation(summary = "Get all active popular cards (localized)")
+    public ResponseEntity<ApiResponse<List<PopularCardDto>>> getPopularCards(
+            @RequestParam(defaultValue = "en") String lang) {
+        List<PopularCardDto> data = popularCardRepository
+                .findByStatusOrderBySortOrder(WingPopularCard.Status.ACTIVE)
+                .stream()
+                .map(p -> {
+                    WingPopularCardTranslation t = pickPopularCardTranslation(p.getTranslations(), lang);
+                    return PopularCardDto.builder()
+                            .id(p.getId()).emoji(p.getEmoji())
+                            .bgColor(p.getBgColor()).borderColor(p.getBorderColor())
+                            .linkUrl(p.getLinkUrl())
+                            .title(t != null ? t.getTitle() : null)
+                            .subtitle(t != null ? t.getSubtitle() : null)
+                            .sortOrder(p.getSortOrder()).build();
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // ── Partners ──────────────────────────────────────────────────────────────
+
+    @GetMapping("/partners")
+    @Operation(summary = "Get all active partners (localized)")
+    public ResponseEntity<ApiResponse<List<PartnerDto>>> getPartners(
+            @RequestParam(defaultValue = "en") String lang) {
+        List<PartnerDto> data = partnerRepository
+                .findByStatusOrderBySortOrder(WingPartner.Status.ACTIVE)
+                .stream()
+                .map(p -> {
+                    WingPartnerTranslation t = pickPartnerTranslation(p.getTranslations(), lang);
+                    return PartnerDto.builder()
+                            .id(p.getId()).icon(p.getIcon())
+                            .bgColor(p.getBgColor()).badge(p.getBadge())
+                            .isNewPartner(p.isNewPartner())
+                            .name(t != null ? t.getName() : null)
+                            .description(t != null ? t.getDescription() : null)
+                            .sortOrder(p.getSortOrder()).build();
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // ── Translation pickers (with en fallback) ────────────────────────────────
+
+    private WingBannerTranslation pickBannerTranslation(List<WingBannerTranslation> list, String lang) {
+        if (list == null || list.isEmpty()) return null;
+        return list.stream().filter(t -> t.getLanguageCode().equals(lang)).findFirst()
+                .orElseGet(() -> list.stream().filter(t -> t.getLanguageCode().equals(FALLBACK)).findFirst()
+                        .orElse(list.get(0)));
+    }
+
+    private WingCategoryTranslation pickCategoryTranslation(List<WingCategoryTranslation> list, String lang) {
+        if (list == null || list.isEmpty()) return null;
+        return list.stream().filter(t -> t.getLanguageCode().equals(lang)).findFirst()
+                .orElseGet(() -> list.stream().filter(t -> t.getLanguageCode().equals(FALLBACK)).findFirst()
+                        .orElse(list.get(0)));
+    }
+
+    private WingServiceTranslation pickServiceTranslation(List<WingServiceTranslation> list, String lang) {
+        if (list == null || list.isEmpty()) return null;
+        return list.stream().filter(t -> t.getLanguageCode().equals(lang)).findFirst()
+                .orElseGet(() -> list.stream().filter(t -> t.getLanguageCode().equals(FALLBACK)).findFirst()
+                        .orElse(list.get(0)));
+    }
+
+    private WingPopularCardTranslation pickPopularCardTranslation(List<WingPopularCardTranslation> list, String lang) {
+        if (list == null || list.isEmpty()) return null;
+        return list.stream().filter(t -> t.getLanguageCode().equals(lang)).findFirst()
+                .orElseGet(() -> list.stream().filter(t -> t.getLanguageCode().equals(FALLBACK)).findFirst()
+                        .orElse(list.get(0)));
+    }
+
+    private WingPartnerTranslation pickPartnerTranslation(List<WingPartnerTranslation> list, String lang) {
+        if (list == null || list.isEmpty()) return null;
+        return list.stream().filter(t -> t.getLanguageCode().equals(lang)).findFirst()
+                .orElseGet(() -> list.stream().filter(t -> t.getLanguageCode().equals(FALLBACK)).findFirst()
+                        .orElse(list.get(0)));
+    }
+
+    // ── Mobile DTOs ───────────────────────────────────────────────────────────
+
+    @Data @Builder public static class LocationDto {
+        private UUID id; private String name; private String icon; private int sortOrder;
+    }
+    @Data @Builder public static class BannerDto {
+        private UUID id; private String title; private String subtitle; private String offerText;
+        private String imageUrl; private String gradientFrom; private String gradientTo;
+        private String linkUrl; private int sortOrder;
+    }
+    @Data @Builder public static class CategoryDto {
+        private UUID id; private String key; private String icon;
+        private String name; private String displayName; private int sortOrder;
+    }
+    @Data @Builder public static class ServiceDto {
+        private UUID id; private UUID categoryId; private String categoryKey;
+        private String icon; private String imageUrl;
+        private String title; private String description; private int sortOrder;
+    }
+    @Data @Builder public static class PopularCardDto {
+        private UUID id; private String emoji; private String bgColor; private String borderColor;
+        private String linkUrl; private String title; private String subtitle; private int sortOrder;
+    }
+    @Data @Builder public static class PartnerDto {
+        private UUID id; private String icon; private String bgColor; private String badge;
+        private boolean isNewPartner; private String name; private String description; private int sortOrder;
+    }
+}

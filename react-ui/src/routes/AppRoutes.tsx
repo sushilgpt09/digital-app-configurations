@@ -12,6 +12,12 @@ import { AppLanguageListPage } from '../pages/appLanguages/AppLanguageListPage';
 import { BakongSenderConfigPage } from '../pages/bakong/BakongSenderConfigPage';
 import { BakongReceiverConfigPage } from '../pages/bakong/BakongReceiverConfigPage';
 import { RoleFormPage } from '../pages/roles/RoleFormPage';
+import { WingLocationPage } from '../pages/wing/WingLocationPage';
+import { WingCategoryPage } from '../pages/wing/WingCategoryPage';
+import { WingServicePage } from '../pages/wing/WingServicePage';
+import { WingBannerPage } from '../pages/wing/WingBannerPage';
+import { WingPopularCardPage } from '../pages/wing/WingPopularCardPage';
+import { WingPartnerPage } from '../pages/wing/WingPartnerPage';
 
 export function AppRoutes() {
   return (
@@ -39,6 +45,12 @@ export function AppRoutes() {
         <Route path="notifications" element={<Navigate to="/translations" replace />} />
         <Route path="bakong/sender" element={<BakongSenderConfigPage />} />
         <Route path="bakong/receiver" element={<BakongReceiverConfigPage />} />
+        <Route path="wing/locations" element={<WingLocationPage />} />
+        <Route path="wing/categories" element={<WingCategoryPage />} />
+        <Route path="wing/services" element={<WingServicePage />} />
+        <Route path="wing/banners" element={<WingBannerPage />} />
+        <Route path="wing/popular-cards" element={<WingPopularCardPage />} />
+        <Route path="wing/partners" element={<WingPartnerPage />} />
         <Route path="releases" element={<ReleaseHistoryPage />} />
         <Route path="audit-logs" element={<AuditLogPage />} />
       </Route>
