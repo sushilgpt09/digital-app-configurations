@@ -1,7 +1,6 @@
 package com.wingbank.config.wingplus.wingservice.entity;
 
 import com.wingbank.config.common.audit.AuditEntity;
-import com.wingbank.config.wingplus.category.entity.WingCategory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,14 +17,16 @@ import java.util.List;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class WingService extends AuditEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private WingCategory category;
-
     private String icon;
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    @Column(name = "is_popular")
+    private boolean isPopular = false;
+
+    @Column(name = "is_new")
+    private boolean isNew = false;
 
     @Column(name = "sort_order")
     private int sortOrder = 0;

@@ -55,8 +55,8 @@ public class WingPartnerServiceImpl implements WingPartnerService {
     }
 
     private void applyFields(WingPartner e, WingPartnerRequest req) {
-        e.setIcon(req.getIcon()); e.setBgColor(req.getBgColor()); e.setBadge(req.getBadge());
-        e.setNewPartner(req.isNewPartner()); e.setSortOrder(req.getSortOrder());
+        e.setIcon(req.getIcon()); e.setBgColor(req.getBgColor()); e.setBorderColor(req.getBorderColor());
+        e.setBadge(req.getBadge()); e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingPartner.Status.valueOf(req.getStatus()) : WingPartner.Status.ACTIVE);
         e.getTranslations().clear();
         if (req.getTranslations() != null) {
@@ -81,8 +81,8 @@ public class WingPartnerServiceImpl implements WingPartnerService {
             translations.put(t.getLanguageCode(), d);
         }
         return WingPartnerResponse.builder()
-                .id(e.getId()).icon(e.getIcon()).bgColor(e.getBgColor()).badge(e.getBadge())
-                .isNewPartner(e.isNewPartner()).sortOrder(e.getSortOrder()).status(e.getStatus().name())
+                .id(e.getId()).icon(e.getIcon()).bgColor(e.getBgColor()).borderColor(e.getBorderColor())
+                .badge(e.getBadge()).sortOrder(e.getSortOrder()).status(e.getStatus().name())
                 .translations(translations).createdAt(e.getCreatedAt()).updatedAt(e.getUpdatedAt()).build();
     }
 }

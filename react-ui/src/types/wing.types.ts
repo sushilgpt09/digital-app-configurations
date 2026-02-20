@@ -46,7 +46,7 @@ export interface WingCategoryRequest {
   translations?: Record<string, WingCategoryTranslationData>;
 }
 
-// ── Service ───────────────────────────────────────────────
+// ── Partners (Wing+ master partner list, was Services) ────
 export interface WingServiceTranslationData {
   title: string;
   description: string;
@@ -54,10 +54,10 @@ export interface WingServiceTranslationData {
 
 export interface WingService {
   id: string;
-  categoryId: string;
-  categoryKey: string;
   icon: string | null;
   imageUrl: string | null;
+  isPopular: boolean;
+  isNew: boolean;
   sortOrder: number;
   status: string;
   translations: Record<string, WingServiceTranslationData>;
@@ -66,9 +66,10 @@ export interface WingService {
 }
 
 export interface WingServiceRequest {
-  categoryId: string;
   icon?: string;
   imageUrl?: string;
+  isPopular?: boolean;
+  isNew?: boolean;
   sortOrder?: number;
   status?: string;
   translations?: Record<string, WingServiceTranslationData>;
@@ -104,7 +105,7 @@ export interface WingBannerRequest {
   translations?: Record<string, WingBannerTranslationData>;
 }
 
-// ── Popular Card ──────────────────────────────────────────
+// ── Popular Partners (was Popular Cards) ──────────────────
 export interface WingPopularCardTranslationData {
   title: string;
   subtitle: string;
@@ -133,7 +134,7 @@ export interface WingPopularCardRequest {
   translations?: Record<string, WingPopularCardTranslationData>;
 }
 
-// ── Partner ───────────────────────────────────────────────
+// ── New Partners ──────────────────────────────────────────
 export interface WingPartnerTranslationData {
   name: string;
   description: string;
@@ -143,8 +144,8 @@ export interface WingPartner {
   id: string;
   icon: string | null;
   bgColor: string | null;
+  borderColor: string | null;
   badge: string | null;
-  isNewPartner: boolean;
   sortOrder: number;
   status: string;
   translations: Record<string, WingPartnerTranslationData>;
@@ -155,8 +156,8 @@ export interface WingPartner {
 export interface WingPartnerRequest {
   icon?: string;
   bgColor?: string;
+  borderColor?: string;
   badge?: string;
-  isNewPartner?: boolean;
   sortOrder?: number;
   status?: string;
   translations?: Record<string, WingPartnerTranslationData>;

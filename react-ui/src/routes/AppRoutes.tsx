@@ -47,10 +47,10 @@ export function AppRoutes() {
         <Route path="bakong/receiver" element={<BakongReceiverConfigPage />} />
         <Route path="wing/locations" element={<WingLocationPage />} />
         <Route path="wing/categories" element={<WingCategoryPage />} />
-        <Route path="wing/services" element={<WingServicePage />} />
+        <Route path="wing/partners" element={<WingServicePage />} />
         <Route path="wing/banners" element={<WingBannerPage />} />
-        <Route path="wing/popular-cards" element={<WingPopularCardPage />} />
-        <Route path="wing/partners" element={<WingPartnerPage />} />
+        <Route path="wing/popular-partners" element={<WingPopularCardPage />} />
+        <Route path="wing/new-partners" element={<WingPartnerPage />} />
         <Route path="releases" element={<ReleaseHistoryPage />} />
         <Route path="audit-logs" element={<AuditLogPage />} />
       </Route>

@@ -7,10 +7,10 @@ import java.util.UUID;
 @Data @Builder
 public class WingServiceResponse {
     private UUID id;
-    private UUID categoryId;
-    private String categoryKey;
     private String icon;
     private String imageUrl;
+    private boolean isPopular;
+    private boolean isNew;
     private int sortOrder;
     private String status;
     private Map<String, WingServiceTranslationData> translations;

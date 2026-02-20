@@ -92,10 +92,10 @@ const sidebarItems: SidebarEntry[] = [
     children: [
       { path: '/wing/locations', label: 'Locations', icon: MapPin },
       { path: '/wing/categories', label: 'Categories', icon: Tag },
-      { path: '/wing/services', label: 'Services', icon: Wrench },
-      { path: '/wing/banners', label: 'Banners', icon: Image },
-      { path: '/wing/popular-cards', label: 'Popular Cards', icon: Star },
       { path: '/wing/partners', label: 'Partners', icon: Handshake },
+      { path: '/wing/banners', label: 'Banners', icon: Image },
+      { path: '/wing/popular-partners', label: 'Popular Partners', icon: Star },
+      { path: '/wing/new-partners', label: 'New Partners', icon: Wrench },
     ],
   },
   { path: '/releases', label: 'App Release History', icon: Smartphone },

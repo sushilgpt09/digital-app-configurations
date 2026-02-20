@@ -3,7 +3,7 @@ import { ApiResponse, PagedResponse, PaginationParams } from '../types/api.types
 import { WingService, WingServiceRequest } from '../types/wing.types';
 
 export const wingServicesApi = {
-  getAll: (params: PaginationParams & { categoryId?: string }) =>
+  getAll: (params: PaginationParams) =>
     api.get<ApiResponse<PagedResponse<WingService>>>('/wing/services', { params }),
   getById: (id: string) =>
     api.get<ApiResponse<WingService>>(`/wing/services/${id}`),

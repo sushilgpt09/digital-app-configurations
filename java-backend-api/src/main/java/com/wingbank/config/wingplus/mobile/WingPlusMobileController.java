@@ -108,43 +108,32 @@ public class WingPlusMobileController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
-    // ── Services by Category ──────────────────────────────────────────────────
+    // ── Partners (all active) ─────────────────────────────────────────────────
 
-    @GetMapping("/categories/{categoryId}/services")
-    @Operation(summary = "Get active services for a category (localized)")
-    public ResponseEntity<ApiResponse<List<ServiceDto>>> getServicesByCategory(
-            @PathVariable UUID categoryId,
+    @GetMapping("/partners")
+    @Operation(summary = "Get all active partners (localized)")
+    public ResponseEntity<ApiResponse<List<PartnerDto>>> getPartners(
             @RequestParam(defaultValue = "en") String lang) {
-        List<ServiceDto> data = serviceRepository
-                .findByCategoryIdAndStatusOrderBySortOrder(categoryId, WingService.Status.ACTIVE)
+        List<PartnerDto> data = serviceRepository
+                .findByStatusOrderBySortOrder(WingService.Status.ACTIVE)
                 .stream()
-                .map(s -> {
-                    WingServiceTranslation t = pickServiceTranslation(s.getTranslations(), lang);
-                    return ServiceDto.builder()
-                            .id(s.getId())
-                            .categoryId(s.getCategory().getId())
-                            .categoryKey(s.getCategory().getKey())
-                            .icon(s.getIcon()).imageUrl(s.getImageUrl())
-                            .title(t != null ? t.getTitle() : null)
-                            .description(t != null ? t.getDescription() : null)
-                            .sortOrder(s.getSortOrder()).build();
-                })
+                .map(s -> mapToPartnerDto(s, lang))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
-    // ── Popular Cards ─────────────────────────────────────────────────────────
+    // ── Popular Partners ──────────────────────────────────────────────────────
 
-    @GetMapping("/popular-cards")
-    @Operation(summary = "Get all active popular cards (localized)")
-    public ResponseEntity<ApiResponse<List<PopularCardDto>>> getPopularCards(
+    @GetMapping("/popular-partners")
+    @Operation(summary = "Get popular partners (localized)")
+    public ResponseEntity<ApiResponse<List<PopularPartnerDto>>> getPopularPartners(
             @RequestParam(defaultValue = "en") String lang) {
-        List<PopularCardDto> data = popularCardRepository
+        List<PopularPartnerDto> data = popularCardRepository
                 .findByStatusOrderBySortOrder(WingPopularCard.Status.ACTIVE)
                 .stream()
                 .map(p -> {
                     WingPopularCardTranslation t = pickPopularCardTranslation(p.getTranslations(), lang);
-                    return PopularCardDto.builder()
+                    return PopularPartnerDto.builder()
                             .id(p.getId()).emoji(p.getEmoji())
                             .bgColor(p.getBgColor()).borderColor(p.getBorderColor())
                             .linkUrl(p.getLinkUrl())
@@ -156,21 +145,20 @@ public class WingPlusMobileController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
-    // ── Partners ──────────────────────────────────────────────────────────────
+    // ── New Partners ──────────────────────────────────────────────────────────
 
-    @GetMapping("/partners")
-    @Operation(summary = "Get all active partners (localized)")
-    public ResponseEntity<ApiResponse<List<PartnerDto>>> getPartners(
+    @GetMapping("/new-partners")
+    @Operation(summary = "Get new partners (localized)")
+    public ResponseEntity<ApiResponse<List<NewPartnerDto>>> getNewPartners(
             @RequestParam(defaultValue = "en") String lang) {
-        List<PartnerDto> data = partnerRepository
+        List<NewPartnerDto> data = partnerRepository
                 .findByStatusOrderBySortOrder(WingPartner.Status.ACTIVE)
                 .stream()
                 .map(p -> {
                     WingPartnerTranslation t = pickPartnerTranslation(p.getTranslations(), lang);
-                    return PartnerDto.builder()
+                    return NewPartnerDto.builder()
                             .id(p.getId()).icon(p.getIcon())
-                            .bgColor(p.getBgColor()).badge(p.getBadge())
-                            .isNewPartner(p.isNewPartner())
+                            .bgColor(p.getBgColor()).borderColor(p.getBorderColor()).badge(p.getBadge())
                             .name(t != null ? t.getName() : null)
                             .description(t != null ? t.getDescription() : null)
                             .sortOrder(p.getSortOrder()).build();
@@ -179,7 +167,17 @@ public class WingPlusMobileController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
-    // ── Translation pickers (with en fallback) ────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private PartnerDto mapToPartnerDto(WingService s, String lang) {
+        WingServiceTranslation t = pickServiceTranslation(s.getTranslations(), lang);
+        return PartnerDto.builder()
+                .id(s.getId()).icon(s.getIcon()).imageUrl(s.getImageUrl())
+                .isPopular(s.isPopular()).isNew(s.isNew())
+                .name(t != null ? t.getTitle() : null)
+                .description(t != null ? t.getDescription() : null)
+                .sortOrder(s.getSortOrder()).build();
+    }
 
     private WingBannerTranslation pickBannerTranslation(List<WingBannerTranslation> list, String lang) {
         if (list == null || list.isEmpty()) return null;
@@ -230,17 +228,17 @@ public class WingPlusMobileController {
         private UUID id; private String key; private String icon;
         private String name; private String displayName; private int sortOrder;
     }
-    @Data @Builder public static class ServiceDto {
-        private UUID id; private UUID categoryId; private String categoryKey;
-        private String icon; private String imageUrl;
-        private String title; private String description; private int sortOrder;
+    @Data @Builder public static class PartnerDto {
+        private UUID id; private String icon; private String imageUrl;
+        private boolean isPopular; private boolean isNew;
+        private String name; private String description; private int sortOrder;
     }
-    @Data @Builder public static class PopularCardDto {
+    @Data @Builder public static class PopularPartnerDto {
         private UUID id; private String emoji; private String bgColor; private String borderColor;
         private String linkUrl; private String title; private String subtitle; private int sortOrder;
     }
-    @Data @Builder public static class PartnerDto {
-        private UUID id; private String icon; private String bgColor; private String badge;
-        private boolean isNewPartner; private String name; private String description; private int sortOrder;
+    @Data @Builder public static class NewPartnerDto {
+        private UUID id; private String icon; private String bgColor; private String borderColor;
+        private String badge; private String name; private String description; private int sortOrder;
     }
 }

@@ -74,7 +74,7 @@ function PopularCardFormModal({
   const trans = form.translations || {};
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Popular Card' : 'Add Popular Card'}>
+    <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Popular Partner' : 'Add Popular Partner'}>
       <form onSubmit={handleSubmit}>
         <InputField label="Emoji" value={form.emoji || ''} onChange={(e) => setForm({ ...form, emoji: e.target.value })} placeholder="💳" />
         <div className="grid grid-cols-2 gap-3">
@@ -101,7 +101,7 @@ function PopularCardFormModal({
             ))}
           </div>
           <div className="p-4 space-y-3">
-            <InputField label="Title" value={trans[activeLang]?.title || ''} onChange={(e) => setTrans(activeLang, 'title', e.target.value)} placeholder={`Card title in ${LANGS.find(l => l.code === activeLang)?.label}`} />
+            <InputField label="Title" value={trans[activeLang]?.title || ''} onChange={(e) => setTrans(activeLang, 'title', e.target.value)} placeholder={`Title in ${LANGS.find(l => l.code === activeLang)?.label}`} />
             <InputField label="Subtitle" value={trans[activeLang]?.subtitle || ''} onChange={(e) => setTrans(activeLang, 'subtitle', e.target.value)} placeholder="Short subtitle" />
           </div>
         </div>
@@ -155,8 +155,8 @@ export function WingPopularCardPage() {
 
   return (
     <div>
-      <PageHeader title="Wing+ Popular Cards" action={<button onClick={() => { setEditingItem(null); setShowForm(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-[#5C90E6] text-white rounded-lg hover:bg-[#4A7DD4] transition-colors"><Plus size={18} /> Add Card</button>} />
-      <SearchFilter searchValue={search} onSearchChange={setSearch} onSearch={() => { setSearchQuery(search); setStatusQuery(status); setPage(0); }} onReset={() => { setSearch(''); setStatus(''); setSearchQuery(''); setStatusQuery(''); setPage(0); }} placeholder="Search popular cards..." statusValue={status} onStatusChange={setStatus} statusOptions={[{ label: 'Active', value: 'ACTIVE' }, { label: 'Inactive', value: 'INACTIVE' }]} />
+      <PageHeader title="Wing+ Popular Partners" action={<button onClick={() => { setEditingItem(null); setShowForm(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-[#5C90E6] text-white rounded-lg hover:bg-[#4A7DD4] transition-colors"><Plus size={18} /> Add Popular Partner</button>} />
+      <SearchFilter searchValue={search} onSearchChange={setSearch} onSearch={() => { setSearchQuery(search); setStatusQuery(status); setPage(0); }} onReset={() => { setSearch(''); setStatus(''); setSearchQuery(''); setStatusQuery(''); setPage(0); }} placeholder="Search popular partners..." statusValue={status} onStatusChange={setStatus} statusOptions={[{ label: 'Active', value: 'ACTIVE' }, { label: 'Inactive', value: 'INACTIVE' }]} />
       <DataTable columns={columns} data={data.content} loading={loading} page={data.page} size={data.size} totalElements={data.totalElements} totalPages={data.totalPages} onPageChange={setPage} onSizeChange={(s) => { setSize(s); setPage(0); }} onEdit={(c) => { setEditingItem(c); setShowForm(true); }} onDelete={setDeleteTarget} rowKey={(c) => c.id} />
       <PopularCardFormModal isOpen={showForm} onClose={() => setShowForm(false)} onSuccess={fetchData} item={editingItem} />
       <ConfirmDialog isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={async () => { setDeleting(true); try { await wingPopularCardsApi.delete(deleteTarget!.id); toast.success('Deleted'); setDeleteTarget(null); fetchData(); } catch {} finally { setDeleting(false); } }} loading={deleting} />

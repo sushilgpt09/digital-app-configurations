@@ -2,8 +2,6 @@ package com.wingbank.config.wingplus.wingservice.service.impl;
 
 import com.wingbank.config.common.dto.PagedResponse;
 import com.wingbank.config.common.exception.ResourceNotFoundException;
-import com.wingbank.config.wingplus.category.entity.WingCategory;
-import com.wingbank.config.wingplus.category.repository.WingCategoryRepository;
 import com.wingbank.config.wingplus.wingservice.dto.WingServiceRequest;
 import com.wingbank.config.wingplus.wingservice.dto.WingServiceResponse;
 import com.wingbank.config.wingplus.wingservice.dto.WingServiceTranslationData;
@@ -25,11 +23,10 @@ import java.util.stream.Collectors;
 public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
 
     private final WingServiceRepository repository;
-    private final WingCategoryRepository categoryRepository;
 
     @Override @Transactional(readOnly = true)
-    public PagedResponse<WingServiceResponse> getAll(String categoryId, String status, int page, int size) {
-        Page<WingService> pg = repository.findAllWithFilters(categoryId, status, PageRequest.of(page, size));
+    public PagedResponse<WingServiceResponse> getAll(String status, int page, int size) {
+        Page<WingService> pg = repository.findAllWithFilters(status, PageRequest.of(page, size));
         return PagedResponse.from(pg, pg.getContent().stream().map(this::toResponse).collect(Collectors.toList()));
     }
 
@@ -58,15 +55,20 @@ public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
     }
 
     @Override @Transactional(readOnly = true)
-    public List<WingServiceResponse> getActiveByCategory(UUID categoryId) {
-        return repository.findByCategoryIdAndStatusOrderBySortOrder(categoryId, WingService.Status.ACTIVE)
+    public List<WingServiceResponse> getPopularPartners() {
+        return repository.findByIsPopularAndStatusOrderBySortOrder(true, WingService.Status.ACTIVE)
+                .stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    @Override @Transactional(readOnly = true)
+    public List<WingServiceResponse> getNewPartners() {
+        return repository.findByIsNewAndStatusOrderBySortOrder(true, WingService.Status.ACTIVE)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     private void applyFields(WingService e, WingServiceRequest req) {
-        WingCategory cat = categoryRepository.findById(req.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("WingCategory", "id", req.getCategoryId()));
-        e.setCategory(cat); e.setIcon(req.getIcon()); e.setImageUrl(req.getImageUrl());
+        e.setIcon(req.getIcon()); e.setImageUrl(req.getImageUrl());
+        e.setPopular(req.isPopular()); e.setNew(req.isNew());
         e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingService.Status.valueOf(req.getStatus()) : WingService.Status.ACTIVE);
         e.getTranslations().clear();
@@ -92,8 +94,8 @@ public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
             translations.put(t.getLanguageCode(), d);
         }
         return WingServiceResponse.builder()
-                .id(e.getId()).categoryId(e.getCategory().getId()).categoryKey(e.getCategory().getKey())
-                .icon(e.getIcon()).imageUrl(e.getImageUrl())
+                .id(e.getId()).icon(e.getIcon()).imageUrl(e.getImageUrl())
+                .isPopular(e.isPopular()).isNew(e.isNew())
                 .sortOrder(e.getSortOrder()).status(e.getStatus().name())
                 .translations(translations).createdAt(e.getCreatedAt()).updatedAt(e.getUpdatedAt()).build();
     }

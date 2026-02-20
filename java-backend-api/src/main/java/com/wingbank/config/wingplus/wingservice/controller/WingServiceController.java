@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/wing/services")
-@Tag(name = "Wing+ Services")
+@Tag(name = "Wing+ Partners (Services)")
 @RequiredArgsConstructor
 public class WingServiceController {
 
@@ -27,8 +27,8 @@ public class WingServiceController {
     @PreAuthorize("hasAuthority('WING_SERVICE_VIEW')")
     public ResponseEntity<ApiResponse<PagedResponse<WingServiceResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String categoryId, @RequestParam(required = false) String status) {
-        return ResponseEntity.ok(ApiResponse.success(service.getAll(categoryId, status, page, size)));
+            @RequestParam(required = false) String status) {
+        return ResponseEntity.ok(ApiResponse.success(service.getAll(status, page, size)));
     }
 
     @GetMapping("/{id}")
@@ -40,19 +40,19 @@ public class WingServiceController {
     @PostMapping
     @PreAuthorize("hasAuthority('WING_SERVICE_CREATE')")
     public ResponseEntity<ApiResponse<WingServiceResponse>> create(@Valid @RequestBody WingServiceRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Service created", service.create(req)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Partner created", service.create(req)));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('WING_SERVICE_UPDATE')")
     public ResponseEntity<ApiResponse<WingServiceResponse>> update(@PathVariable UUID id, @Valid @RequestBody WingServiceRequest req) {
-        return ResponseEntity.ok(ApiResponse.success("Service updated", service.update(id, req)));
+        return ResponseEntity.ok(ApiResponse.success("Partner updated", service.update(id, req)));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('WING_SERVICE_DELETE')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Service deleted", null));
+        return ResponseEntity.ok(ApiResponse.success("Partner deleted", null));
     }
 }

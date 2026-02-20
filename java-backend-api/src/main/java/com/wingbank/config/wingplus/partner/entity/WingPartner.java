@@ -22,10 +22,10 @@ public class WingPartner extends AuditEntity {
     @Column(name = "bg_color")
     private String bgColor;
 
-    private String badge;
+    @Column(name = "border_color")
+    private String borderColor;
 
-    @Column(name = "is_new_partner")
-    private boolean isNewPartner = false;
+    private String badge;
 
     @Column(name = "sort_order")
     private int sortOrder = 0;
