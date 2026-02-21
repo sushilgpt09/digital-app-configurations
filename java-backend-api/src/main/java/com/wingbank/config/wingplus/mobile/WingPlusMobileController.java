@@ -9,12 +9,6 @@ import com.wingbank.config.wingplus.category.entity.WingCategoryTranslation;
 import com.wingbank.config.wingplus.category.repository.WingCategoryRepository;
 import com.wingbank.config.wingplus.location.entity.WingLocation;
 import com.wingbank.config.wingplus.location.repository.WingLocationRepository;
-import com.wingbank.config.wingplus.partner.entity.WingPartner;
-import com.wingbank.config.wingplus.partner.entity.WingPartnerTranslation;
-import com.wingbank.config.wingplus.partner.repository.WingPartnerRepository;
-import com.wingbank.config.wingplus.popularcard.entity.WingPopularCard;
-import com.wingbank.config.wingplus.popularcard.entity.WingPopularCardTranslation;
-import com.wingbank.config.wingplus.popularcard.repository.WingPopularCardRepository;
 import com.wingbank.config.wingplus.wingservice.entity.WingService;
 import com.wingbank.config.wingplus.wingservice.entity.WingServiceTranslation;
 import com.wingbank.config.wingplus.wingservice.repository.WingServiceRepository;
@@ -42,8 +36,6 @@ public class WingPlusMobileController {
     private final WingCategoryRepository categoryRepository;
     private final WingServiceRepository serviceRepository;
     private final WingBannerRepository bannerRepository;
-    private final WingPopularCardRepository popularCardRepository;
-    private final WingPartnerRepository partnerRepository;
 
     // ── Locations ─────────────────────────────────────────────────────────────
 
@@ -108,6 +100,28 @@ public class WingPlusMobileController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
+    // ── Category Services ─────────────────────────────────────────────────────
+
+    @GetMapping("/categories/{id}/services")
+    @Operation(summary = "Get active services for a category (localized)")
+    public ResponseEntity<ApiResponse<List<ServiceDto>>> getCategoryServices(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "en") String lang) {
+        List<ServiceDto> data = serviceRepository
+                .findByCategoryIdAndStatusOrderBySortOrder(id, WingService.Status.ACTIVE)
+                .stream()
+                .map(s -> {
+                    WingServiceTranslation t = pickServiceTranslation(s.getTranslations(), lang);
+                    return ServiceDto.builder()
+                            .id(s.getId()).icon(s.getIcon()).imageUrl(s.getImageUrl())
+                            .title(t != null ? t.getTitle() : null)
+                            .description(t != null ? t.getDescription() : null)
+                            .sortOrder(s.getSortOrder()).build();
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
     // ── Partners (all active) ─────────────────────────────────────────────────
 
     @GetMapping("/partners")
@@ -125,21 +139,23 @@ public class WingPlusMobileController {
     // ── Popular Partners ──────────────────────────────────────────────────────
 
     @GetMapping("/popular-partners")
-    @Operation(summary = "Get popular partners (localized)")
+    @Operation(summary = "Get popular partners with display config (localized)")
     public ResponseEntity<ApiResponse<List<PopularPartnerDto>>> getPopularPartners(
             @RequestParam(defaultValue = "en") String lang) {
-        List<PopularPartnerDto> data = popularCardRepository
-                .findByStatusOrderBySortOrder(WingPopularCard.Status.ACTIVE)
+        List<PopularPartnerDto> data = serviceRepository
+                .findByIsPopularAndStatusOrderByPopularSortOrder(true, WingService.Status.ACTIVE)
                 .stream()
-                .map(p -> {
-                    WingPopularCardTranslation t = pickPopularCardTranslation(p.getTranslations(), lang);
+                .map(s -> {
+                    WingServiceTranslation t = pickServiceTranslation(s.getTranslations(), lang);
                     return PopularPartnerDto.builder()
-                            .id(p.getId()).emoji(p.getEmoji())
-                            .bgColor(p.getBgColor()).borderColor(p.getBorderColor())
-                            .linkUrl(p.getLinkUrl())
-                            .title(t != null ? t.getTitle() : null)
-                            .subtitle(t != null ? t.getSubtitle() : null)
-                            .sortOrder(p.getSortOrder()).build();
+                            .id(s.getId())
+                            .icon(s.getIcon()).imageUrl(s.getImageUrl())
+                            .name(t != null ? t.getTitle() : null)
+                            .description(t != null ? t.getDescription() : null)
+                            .popularEmoji(s.getPopularEmoji())
+                            .popularBgColor(s.getPopularBgColor())
+                            .popularBorderColor(s.getPopularBorderColor())
+                            .popularSortOrder(s.getPopularSortOrder()).build();
                 })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(data));
@@ -148,20 +164,23 @@ public class WingPlusMobileController {
     // ── New Partners ──────────────────────────────────────────────────────────
 
     @GetMapping("/new-partners")
-    @Operation(summary = "Get new partners (localized)")
+    @Operation(summary = "Get new partners with display config (localized)")
     public ResponseEntity<ApiResponse<List<NewPartnerDto>>> getNewPartners(
             @RequestParam(defaultValue = "en") String lang) {
-        List<NewPartnerDto> data = partnerRepository
-                .findByStatusOrderBySortOrder(WingPartner.Status.ACTIVE)
+        List<NewPartnerDto> data = serviceRepository
+                .findByIsNewAndStatusOrderByNewSortOrder(true, WingService.Status.ACTIVE)
                 .stream()
-                .map(p -> {
-                    WingPartnerTranslation t = pickPartnerTranslation(p.getTranslations(), lang);
+                .map(s -> {
+                    WingServiceTranslation t = pickServiceTranslation(s.getTranslations(), lang);
                     return NewPartnerDto.builder()
-                            .id(p.getId()).icon(p.getIcon())
-                            .bgColor(p.getBgColor()).borderColor(p.getBorderColor()).badge(p.getBadge())
-                            .name(t != null ? t.getName() : null)
+                            .id(s.getId())
+                            .icon(s.getIcon()).imageUrl(s.getImageUrl())
+                            .name(t != null ? t.getTitle() : null)
                             .description(t != null ? t.getDescription() : null)
-                            .sortOrder(p.getSortOrder()).build();
+                            .newBgColor(s.getNewBgColor())
+                            .newBorderColor(s.getNewBorderColor())
+                            .newBadge(s.getNewBadge())
+                            .newSortOrder(s.getNewSortOrder()).build();
                 })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(data));
@@ -200,20 +219,6 @@ public class WingPlusMobileController {
                         .orElse(list.get(0)));
     }
 
-    private WingPopularCardTranslation pickPopularCardTranslation(List<WingPopularCardTranslation> list, String lang) {
-        if (list == null || list.isEmpty()) return null;
-        return list.stream().filter(t -> t.getLanguageCode().equals(lang)).findFirst()
-                .orElseGet(() -> list.stream().filter(t -> t.getLanguageCode().equals(FALLBACK)).findFirst()
-                        .orElse(list.get(0)));
-    }
-
-    private WingPartnerTranslation pickPartnerTranslation(List<WingPartnerTranslation> list, String lang) {
-        if (list == null || list.isEmpty()) return null;
-        return list.stream().filter(t -> t.getLanguageCode().equals(lang)).findFirst()
-                .orElseGet(() -> list.stream().filter(t -> t.getLanguageCode().equals(FALLBACK)).findFirst()
-                        .orElse(list.get(0)));
-    }
-
     // ── Mobile DTOs ───────────────────────────────────────────────────────────
 
     @Data @Builder public static class LocationDto {
@@ -228,17 +233,25 @@ public class WingPlusMobileController {
         private UUID id; private String key; private String icon;
         private String name; private String displayName; private int sortOrder;
     }
+    @Data @Builder public static class ServiceDto {
+        private UUID id; private String icon; private String imageUrl;
+        private String title; private String description; private int sortOrder;
+    }
     @Data @Builder public static class PartnerDto {
         private UUID id; private String icon; private String imageUrl;
         private boolean isPopular; private boolean isNew;
         private String name; private String description; private int sortOrder;
     }
     @Data @Builder public static class PopularPartnerDto {
-        private UUID id; private String emoji; private String bgColor; private String borderColor;
-        private String linkUrl; private String title; private String subtitle; private int sortOrder;
+        private UUID id; private String icon; private String imageUrl;
+        private String name; private String description;
+        private String popularEmoji; private String popularBgColor; private String popularBorderColor;
+        private int popularSortOrder;
     }
     @Data @Builder public static class NewPartnerDto {
-        private UUID id; private String icon; private String bgColor; private String borderColor;
-        private String badge; private String name; private String description; private int sortOrder;
+        private UUID id; private String icon; private String imageUrl;
+        private String name; private String description;
+        private String newBgColor; private String newBorderColor; private String newBadge;
+        private int newSortOrder;
     }
 }

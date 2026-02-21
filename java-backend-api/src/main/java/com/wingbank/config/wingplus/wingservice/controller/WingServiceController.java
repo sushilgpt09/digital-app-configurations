@@ -27,8 +27,10 @@ public class WingServiceController {
     @PreAuthorize("hasAuthority('WING_SERVICE_VIEW')")
     public ResponseEntity<ApiResponse<PagedResponse<WingServiceResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String status) {
-        return ResponseEntity.ok(ApiResponse.success(service.getAll(status, page, size)));
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean isPopular,
+            @RequestParam(required = false) Boolean isNew) {
+        return ResponseEntity.ok(ApiResponse.success(service.getAll(status, isPopular, isNew, page, size)));
     }
 
     @GetMapping("/{id}")

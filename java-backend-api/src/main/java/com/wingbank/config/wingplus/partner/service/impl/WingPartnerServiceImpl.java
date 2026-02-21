@@ -58,13 +58,20 @@ public class WingPartnerServiceImpl implements WingPartnerService {
         e.setIcon(req.getIcon()); e.setBgColor(req.getBgColor()); e.setBorderColor(req.getBorderColor());
         e.setBadge(req.getBadge()); e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingPartner.Status.valueOf(req.getStatus()) : WingPartner.Status.ACTIVE);
-        e.getTranslations().clear();
         if (req.getTranslations() != null) {
+            Map<String, WingPartnerTranslation> existing = e.getTranslations().stream()
+                    .collect(java.util.stream.Collectors.toMap(WingPartnerTranslation::getLanguageCode, t -> t));
+            e.getTranslations().removeIf(t -> !req.getTranslations().containsKey(t.getLanguageCode()));
             req.getTranslations().forEach((lang, data) -> {
-                WingPartnerTranslation t = new WingPartnerTranslation();
-                t.setPartner(e); t.setLanguageCode(lang);
-                t.setName(data.getName()); t.setDescription(data.getDescription());
-                e.getTranslations().add(t);
+                WingPartnerTranslation t = existing.get(lang);
+                if (t != null) {
+                    t.setName(data.getName()); t.setDescription(data.getDescription());
+                } else {
+                    WingPartnerTranslation newT = new WingPartnerTranslation();
+                    newT.setPartner(e); newT.setLanguageCode(lang);
+                    newT.setName(data.getName()); newT.setDescription(data.getDescription());
+                    e.getTranslations().add(newT);
+                }
             });
         }
     }

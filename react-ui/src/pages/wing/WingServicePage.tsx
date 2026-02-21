@@ -12,28 +12,23 @@ import { Modal } from '../../components/common/Modal';
 import { InputField } from '../../components/forms/InputField';
 import { SelectField } from '../../components/forms/SelectField';
 import toast from 'react-hot-toast';
+import { useAppLanguages } from '../../hooks/useAppLanguages';
 
-const LANGS = [
-  { code: 'en', label: 'English' },
-  { code: 'km', label: 'Khmer' },
-];
 const EMPTY_TRANS: WingServiceTranslationData = { title: '', description: '' };
-const EMPTY: WingServiceRequest = {
-  icon: '', imageUrl: '', isPopular: false, isNew: false, sortOrder: 0, status: 'ACTIVE',
-  translations: { en: { ...EMPTY_TRANS }, km: { ...EMPTY_TRANS } },
-};
 
 function PartnerFormModal({
   isOpen, onClose, onSuccess, item,
 }: {
   isOpen: boolean; onClose: () => void; onSuccess: () => void; item?: WingService | null;
 }) {
-  const [form, setForm] = useState<WingServiceRequest>(EMPTY);
+  const langs = useAppLanguages();
+  const [form, setForm] = useState<WingServiceRequest>({ icon: '', imageUrl: '', isPopular: false, isNew: false, sortOrder: 0, status: 'ACTIVE', translations: {} });
   const [activeLang, setActiveLang] = useState('en');
   const [loading, setLoading] = useState(false);
   const isEdit = !!item;
 
   useEffect(() => {
+    const emptyTrans = Object.fromEntries(langs.map(l => [l.code, { ...EMPTY_TRANS }]));
     if (item) {
       setForm({
         icon: item.icon || '',
@@ -42,16 +37,13 @@ function PartnerFormModal({
         isNew: item.isNew,
         sortOrder: item.sortOrder,
         status: item.status,
-        translations: {
-          en: item.translations?.en || { ...EMPTY_TRANS },
-          km: item.translations?.km || { ...EMPTY_TRANS },
-        },
+        translations: { ...emptyTrans, ...item.translations },
       });
     } else {
-      setForm({ ...EMPTY, translations: { en: { ...EMPTY_TRANS }, km: { ...EMPTY_TRANS } } });
+      setForm({ icon: '', imageUrl: '', isPopular: false, isNew: false, sortOrder: 0, status: 'ACTIVE', translations: emptyTrans });
     }
-    setActiveLang('en');
-  }, [item, isOpen]);
+    setActiveLang(langs[0]?.code || 'en');
+  }, [item, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setTrans = (lang: string, field: keyof WingServiceTranslationData, val: string) => {
     setForm((f) => ({
@@ -113,7 +105,7 @@ function PartnerFormModal({
         {/* Translation tabs */}
         <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
           <div className="flex border-b border-gray-200">
-            {LANGS.map((l) => (
+            {langs.map((l) => (
               <button key={l.code} type="button" onClick={() => setActiveLang(l.code)}
                 className={`flex-1 py-2 text-sm font-medium transition-colors ${activeLang === l.code ? 'bg-[#5C90E6] text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}>
                 {l.label}
@@ -121,7 +113,7 @@ function PartnerFormModal({
             ))}
           </div>
           <div className="p-4 space-y-3">
-            <InputField label="Name" value={trans[activeLang]?.title || ''} onChange={(e) => setTrans(activeLang, 'title', e.target.value)} placeholder={`Partner name in ${LANGS.find(l => l.code === activeLang)?.label}`} />
+            <InputField label="Name" value={trans[activeLang]?.title || ''} onChange={(e) => setTrans(activeLang, 'title', e.target.value)} placeholder={`Partner name in ${langs.find(l => l.code === activeLang)?.label}`} />
             <InputField label="Description" value={trans[activeLang]?.description || ''} onChange={(e) => setTrans(activeLang, 'description', e.target.value)} placeholder="Short description" />
           </div>
         </div>

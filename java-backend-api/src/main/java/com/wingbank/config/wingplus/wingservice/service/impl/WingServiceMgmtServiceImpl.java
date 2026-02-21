@@ -25,8 +25,15 @@ public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
     private final WingServiceRepository repository;
 
     @Override @Transactional(readOnly = true)
-    public PagedResponse<WingServiceResponse> getAll(String status, int page, int size) {
-        Page<WingService> pg = repository.findAllWithFilters(status, PageRequest.of(page, size));
+    public PagedResponse<WingServiceResponse> getAll(String status, Boolean isPopular, Boolean isNew, int page, int size) {
+        Page<WingService> pg;
+        if (Boolean.TRUE.equals(isPopular)) {
+            pg = repository.findAllPopularWithFilters(status, PageRequest.of(page, size));
+        } else if (Boolean.TRUE.equals(isNew)) {
+            pg = repository.findAllNewWithFilters(status, PageRequest.of(page, size));
+        } else {
+            pg = repository.findAllWithFilters(status, PageRequest.of(page, size));
+        }
         return PagedResponse.from(pg, pg.getContent().stream().map(this::toResponse).collect(Collectors.toList()));
     }
 
@@ -56,13 +63,13 @@ public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
 
     @Override @Transactional(readOnly = true)
     public List<WingServiceResponse> getPopularPartners() {
-        return repository.findByIsPopularAndStatusOrderBySortOrder(true, WingService.Status.ACTIVE)
+        return repository.findByIsPopularAndStatusOrderByPopularSortOrder(true, WingService.Status.ACTIVE)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     @Override @Transactional(readOnly = true)
     public List<WingServiceResponse> getNewPartners() {
-        return repository.findByIsNewAndStatusOrderBySortOrder(true, WingService.Status.ACTIVE)
+        return repository.findByIsNewAndStatusOrderByNewSortOrder(true, WingService.Status.ACTIVE)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
@@ -71,13 +78,30 @@ public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
         e.setPopular(req.isPopular()); e.setNew(req.isNew());
         e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingService.Status.valueOf(req.getStatus()) : WingService.Status.ACTIVE);
-        e.getTranslations().clear();
+        // Popular display config
+        e.setPopularSortOrder(req.getPopularSortOrder());
+        e.setPopularEmoji(req.getPopularEmoji());
+        e.setPopularBgColor(req.getPopularBgColor());
+        e.setPopularBorderColor(req.getPopularBorderColor());
+        // New display config
+        e.setNewSortOrder(req.getNewSortOrder());
+        e.setNewBgColor(req.getNewBgColor());
+        e.setNewBorderColor(req.getNewBorderColor());
+        e.setNewBadge(req.getNewBadge());
         if (req.getTranslations() != null) {
+            Map<String, WingServiceTranslation> existing = e.getTranslations().stream()
+                    .collect(Collectors.toMap(WingServiceTranslation::getLanguageCode, t -> t));
+            e.getTranslations().removeIf(t -> !req.getTranslations().containsKey(t.getLanguageCode()));
             req.getTranslations().forEach((lang, data) -> {
-                WingServiceTranslation t = new WingServiceTranslation();
-                t.setService(e); t.setLanguageCode(lang);
-                t.setTitle(data.getTitle()); t.setDescription(data.getDescription());
-                e.getTranslations().add(t);
+                WingServiceTranslation t = existing.get(lang);
+                if (t != null) {
+                    t.setTitle(data.getTitle()); t.setDescription(data.getDescription());
+                } else {
+                    WingServiceTranslation newT = new WingServiceTranslation();
+                    newT.setService(e); newT.setLanguageCode(lang);
+                    newT.setTitle(data.getTitle()); newT.setDescription(data.getDescription());
+                    e.getTranslations().add(newT);
+                }
             });
         }
     }
@@ -97,6 +121,10 @@ public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
                 .id(e.getId()).icon(e.getIcon()).imageUrl(e.getImageUrl())
                 .isPopular(e.isPopular()).isNew(e.isNew())
                 .sortOrder(e.getSortOrder()).status(e.getStatus().name())
+                .popularSortOrder(e.getPopularSortOrder()).popularEmoji(e.getPopularEmoji())
+                .popularBgColor(e.getPopularBgColor()).popularBorderColor(e.getPopularBorderColor())
+                .newSortOrder(e.getNewSortOrder()).newBgColor(e.getNewBgColor())
+                .newBorderColor(e.getNewBorderColor()).newBadge(e.getNewBadge())
                 .translations(translations).createdAt(e.getCreatedAt()).updatedAt(e.getUpdatedAt()).build();
     }
 }

@@ -2,8 +2,13 @@ import api from './axios';
 import { ApiResponse, PagedResponse, PaginationParams } from '../types/api.types';
 import { WingService, WingServiceRequest } from '../types/wing.types';
 
+export interface WingServiceParams extends PaginationParams {
+  isPopular?: boolean;
+  isNew?: boolean;
+}
+
 export const wingServicesApi = {
-  getAll: (params: PaginationParams) =>
+  getAll: (params: WingServiceParams) =>
     api.get<ApiResponse<PagedResponse<WingService>>>('/wing/services', { params }),
   getById: (id: string) =>
     api.get<ApiResponse<WingService>>(`/wing/services/${id}`),

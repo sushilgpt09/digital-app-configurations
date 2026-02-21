@@ -13,6 +13,7 @@ import com.wingbank.config.wingplus.category.service.WingCategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import java.util.Map;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,13 +69,20 @@ public class WingCategoryServiceImpl implements WingCategoryService {
     private void applyFields(WingCategory e, WingCategoryRequest req) {
         e.setKey(req.getKey()); e.setIcon(req.getIcon()); e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingCategory.Status.valueOf(req.getStatus()) : WingCategory.Status.ACTIVE);
-        e.getTranslations().clear();
         if (req.getTranslations() != null) {
+            Map<String, WingCategoryTranslation> existing = e.getTranslations().stream()
+                    .collect(java.util.stream.Collectors.toMap(WingCategoryTranslation::getLanguageCode, t -> t));
+            e.getTranslations().removeIf(t -> !req.getTranslations().containsKey(t.getLanguageCode()));
             req.getTranslations().forEach((lang, data) -> {
-                WingCategoryTranslation t = new WingCategoryTranslation();
-                t.setCategory(e); t.setLanguageCode(lang);
-                t.setName(data.getName()); t.setDisplayName(data.getDisplayName());
-                e.getTranslations().add(t);
+                WingCategoryTranslation t = existing.get(lang);
+                if (t != null) {
+                    t.setName(data.getName()); t.setDisplayName(data.getDisplayName());
+                } else {
+                    WingCategoryTranslation newT = new WingCategoryTranslation();
+                    newT.setCategory(e); newT.setLanguageCode(lang);
+                    newT.setName(data.getName()); newT.setDisplayName(data.getDisplayName());
+                    e.getTranslations().add(newT);
+                }
             });
         }
     }

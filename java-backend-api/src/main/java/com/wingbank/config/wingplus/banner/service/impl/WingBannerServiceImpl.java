@@ -12,6 +12,7 @@ import com.wingbank.config.wingplus.banner.service.WingBannerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import java.util.Map;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,13 +60,20 @@ public class WingBannerServiceImpl implements WingBannerService {
         e.setGradientTo(req.getGradientTo()); e.setLinkUrl(req.getLinkUrl());
         e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingBanner.Status.valueOf(req.getStatus()) : WingBanner.Status.ACTIVE);
-        e.getTranslations().clear();
         if (req.getTranslations() != null) {
+            Map<String, WingBannerTranslation> existing = e.getTranslations().stream()
+                    .collect(java.util.stream.Collectors.toMap(WingBannerTranslation::getLanguageCode, t -> t));
+            e.getTranslations().removeIf(t -> !req.getTranslations().containsKey(t.getLanguageCode()));
             req.getTranslations().forEach((lang, data) -> {
-                WingBannerTranslation t = new WingBannerTranslation();
-                t.setBanner(e); t.setLanguageCode(lang);
-                t.setTitle(data.getTitle()); t.setSubtitle(data.getSubtitle()); t.setOfferText(data.getOfferText());
-                e.getTranslations().add(t);
+                WingBannerTranslation t = existing.get(lang);
+                if (t != null) {
+                    t.setTitle(data.getTitle()); t.setSubtitle(data.getSubtitle()); t.setOfferText(data.getOfferText());
+                } else {
+                    WingBannerTranslation newT = new WingBannerTranslation();
+                    newT.setBanner(e); newT.setLanguageCode(lang);
+                    newT.setTitle(data.getTitle()); newT.setSubtitle(data.getSubtitle()); newT.setOfferText(data.getOfferText());
+                    e.getTranslations().add(newT);
+                }
             });
         }
     }

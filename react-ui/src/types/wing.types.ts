@@ -60,6 +60,16 @@ export interface WingService {
   isNew: boolean;
   sortOrder: number;
   status: string;
+  // Popular display config
+  popularSortOrder: number;
+  popularEmoji: string | null;
+  popularBgColor: string | null;
+  popularBorderColor: string | null;
+  // New display config
+  newSortOrder: number;
+  newBgColor: string | null;
+  newBorderColor: string | null;
+  newBadge: string | null;
   translations: Record<string, WingServiceTranslationData>;
   createdAt: string;
   updatedAt: string;
@@ -72,6 +82,16 @@ export interface WingServiceRequest {
   isNew?: boolean;
   sortOrder?: number;
   status?: string;
+  // Popular display config
+  popularSortOrder?: number;
+  popularEmoji?: string;
+  popularBgColor?: string;
+  popularBorderColor?: string;
+  // New display config
+  newSortOrder?: number;
+  newBgColor?: string;
+  newBorderColor?: string;
+  newBadge?: string;
   translations?: Record<string, WingServiceTranslationData>;
 }
 

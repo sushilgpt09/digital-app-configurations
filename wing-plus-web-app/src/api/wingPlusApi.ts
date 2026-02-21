@@ -37,26 +37,30 @@ export interface ServiceDto {
   description: string | null;
 }
 
-export interface PopularCardDto {
-  id: string;
-  emoji: string | null;
-  bgColor: string | null;
-  borderColor: string | null;
-  linkUrl: string | null;
-  sortOrder: number;
-  title: string;
-  subtitle: string | null;
-}
-
-export interface PartnerDto {
+// Popular Partners — returned by /popular-partners
+export interface PopularPartnerDto {
   id: string;
   icon: string | null;
-  bgColor: string | null;
-  badge: string | null;
-  isNewPartner: boolean;
-  sortOrder: number;
-  name: string;
+  imageUrl: string | null;
+  name: string | null;
   description: string | null;
+  popularEmoji: string | null;
+  popularBgColor: string | null;
+  popularBorderColor: string | null;
+  popularSortOrder: number;
+}
+
+// New Partners — returned by /new-partners
+export interface NewPartnerDto {
+  id: string;
+  icon: string | null;
+  imageUrl: string | null;
+  name: string | null;
+  description: string | null;
+  newBgColor: string | null;
+  newBorderColor: string | null;
+  newBadge: string | null;
+  newSortOrder: number;
 }
 
 const wingPlusApi = {
@@ -72,11 +76,11 @@ const wingPlusApi = {
   getCategoryServices: (categoryId: string, lang = 'en') =>
     api.get<{ data: ServiceDto[] }>(`/categories/${categoryId}/services`, { params: { lang } }),
 
-  getPopularCards: (lang = 'en') =>
-    api.get<{ data: PopularCardDto[] }>('/popular-cards', { params: { lang } }),
+  getPopularPartners: (lang = 'en') =>
+    api.get<{ data: PopularPartnerDto[] }>('/popular-partners', { params: { lang } }),
 
-  getPartners: (lang = 'en') =>
-    api.get<{ data: PartnerDto[] }>('/partners', { params: { lang } }),
+  getNewPartners: (lang = 'en') =>
+    api.get<{ data: NewPartnerDto[] }>('/new-partners', { params: { lang } }),
 };
 
 export default wingPlusApi;

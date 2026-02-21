@@ -16,14 +16,33 @@ public interface WingServiceRepository extends JpaRepository<WingService, UUID> 
 
     List<WingService> findByStatusOrderBySortOrder(WingService.Status status);
 
-    List<WingService> findByIsPopularAndStatusOrderBySortOrder(boolean isPopular, WingService.Status status);
+    List<WingService> findByCategoryIdAndStatusOrderBySortOrder(UUID categoryId, WingService.Status status);
 
-    List<WingService> findByIsNewAndStatusOrderBySortOrder(boolean isNew, WingService.Status status);
+    List<WingService> findByIsPopularAndStatusOrderByPopularSortOrder(boolean isPopular, WingService.Status status);
+
+    List<WingService> findByIsNewAndStatusOrderByNewSortOrder(boolean isNew, WingService.Status status);
 
     @Query(value = "SELECT * FROM wing_services WHERE deleted = false " +
-           "AND (:status IS NULL OR status = CAST(:status AS TEXT)) ORDER BY sort_order",
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT)) " +
+           "ORDER BY sort_order",
            countQuery = "SELECT COUNT(*) FROM wing_services WHERE deleted = false " +
            "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
            nativeQuery = true)
     Page<WingService> findAllWithFilters(@Param("status") String status, Pageable pageable);
+
+    @Query(value = "SELECT * FROM wing_services WHERE deleted = false AND is_popular = true " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT)) " +
+           "ORDER BY sort_order",
+           countQuery = "SELECT COUNT(*) FROM wing_services WHERE deleted = false AND is_popular = true " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           nativeQuery = true)
+    Page<WingService> findAllPopularWithFilters(@Param("status") String status, Pageable pageable);
+
+    @Query(value = "SELECT * FROM wing_services WHERE deleted = false AND is_new = true " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT)) " +
+           "ORDER BY sort_order",
+           countQuery = "SELECT COUNT(*) FROM wing_services WHERE deleted = false AND is_new = true " +
+           "AND (:status IS NULL OR status = CAST(:status AS TEXT))",
+           nativeQuery = true)
+    Page<WingService> findAllNewWithFilters(@Param("status") String status, Pageable pageable);
 }

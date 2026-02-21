@@ -58,13 +58,20 @@ public class WingPopularCardServiceImpl implements WingPopularCardService {
         e.setEmoji(req.getEmoji()); e.setBgColor(req.getBgColor()); e.setBorderColor(req.getBorderColor());
         e.setLinkUrl(req.getLinkUrl()); e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingPopularCard.Status.valueOf(req.getStatus()) : WingPopularCard.Status.ACTIVE);
-        e.getTranslations().clear();
         if (req.getTranslations() != null) {
+            Map<String, WingPopularCardTranslation> existing = e.getTranslations().stream()
+                    .collect(java.util.stream.Collectors.toMap(WingPopularCardTranslation::getLanguageCode, t -> t));
+            e.getTranslations().removeIf(t -> !req.getTranslations().containsKey(t.getLanguageCode()));
             req.getTranslations().forEach((lang, data) -> {
-                WingPopularCardTranslation t = new WingPopularCardTranslation();
-                t.setPopularCard(e); t.setLanguageCode(lang);
-                t.setTitle(data.getTitle()); t.setSubtitle(data.getSubtitle());
-                e.getTranslations().add(t);
+                WingPopularCardTranslation t = existing.get(lang);
+                if (t != null) {
+                    t.setTitle(data.getTitle()); t.setSubtitle(data.getSubtitle());
+                } else {
+                    WingPopularCardTranslation newT = new WingPopularCardTranslation();
+                    newT.setPopularCard(e); newT.setLanguageCode(lang);
+                    newT.setTitle(data.getTitle()); newT.setSubtitle(data.getSubtitle());
+                    e.getTranslations().add(newT);
+                }
             });
         }
     }
