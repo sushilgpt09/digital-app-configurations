@@ -85,7 +85,7 @@ export default function App() {
 
   const categoryPreviewSections = categories.map((cat) => ({
     category: cat,
-    services: (servicesCache[cat.id] || []).slice(0, 3),
+    services: (servicesCache[cat.id] || []).slice(0, 4),
   }));
 
   // Stable callbacks for SearchBar — prevents unnecessary re-renders
@@ -93,22 +93,23 @@ export default function App() {
   const handleCategoryFilter = useCallback((f: ServiceDto[]) => setFilteredCategoryServices(f), []);
 
   return (
-    <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-[#c4d962] to-[#a8c945] px-6 pt-6 pb-8 shadow-sm">
-        <div className="flex justify-between items-center mb-6">
-          <button className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-[#f2f2f7] max-w-md mx-auto">
+
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <div className="bg-gradient-to-br from-[#c4d962] to-[#a8c945] px-4 pt-8 pb-5 shadow-sm">
+        <div className="flex justify-between items-center mb-4">
+          <button className="w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+            <ArrowLeft className="w-5 h-5 text-white" />
           </button>
 
           {/* Title fades out when search expands to avoid overlap */}
           <div
             className={`absolute left-1/2 -translate-x-1/2 transition-opacity duration-200 ${appBarSearchExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           >
-            <span className="text-white font-bold text-xl tracking-wide">Wing+</span>
+            <span className="text-white font-bold text-[17px] tracking-wide">Wing+</span>
           </div>
 
-          {/* Expandable search — replaces the plain Search icon */}
+          {/* Expandable search */}
           <SearchBar
             mode="expandable"
             data={allServices}
@@ -119,35 +120,34 @@ export default function App() {
           />
         </div>
 
-        <div className="flex items-center gap-3 mb-4">
-          <h1 className="text-3xl font-bold text-white">Hello, Kemhong</h1>
-        </div>
-
-        <p className="text-white text-base leading-relaxed opacity-95">
-          Explore a variety of local services and shops food, travel, retail, and more...
+        <h1 className="text-[22px] font-bold text-white mb-1">Hello, Kemhong 👋</h1>
+        <p className="text-white/85 text-[13px] leading-snug">
+          Explore local services — food, travel, retail and more
         </p>
       </div>
 
-      {/* ── AppBar Search Results ──────────────────────────────────────── */}
+      {/* ── AppBar Search Results ────────────────────────────────────────── */}
       {isSearching && (
-        <div className="bg-white min-h-[60vh] px-4 py-4">
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-3 px-2">
-            {appBarFiltered.length} result{appBarFiltered.length !== 1 ? 's' : ''}
-          </p>
+        <div className="bg-white min-h-[60vh]">
+          <div className="px-4 py-2.5 border-b border-gray-100">
+            <p className="text-[12px] text-gray-400 font-medium">
+              {appBarFiltered.length} result{appBarFiltered.length !== 1 ? 's' : ''} found
+            </p>
+          </div>
           {appBarFiltered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-gray-400">
               <span className="text-4xl mb-3">🔍</span>
-              <p className="font-medium">No results found</p>
-              <p className="text-sm mt-1">Try a different keyword</p>
+              <p className="text-[15px] font-medium">No results found</p>
+              <p className="text-[13px] mt-1 text-gray-300">Try a different keyword</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="divide-y divide-gray-50">
               {appBarFiltered.map((service) => (
                 <div
                   key={service.id}
-                  className="flex items-center gap-4 bg-gray-50 rounded-2xl p-4 hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="flex items-center gap-3.5 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden text-3xl">
+                  <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden text-2xl">
                     {service.imageUrl ? (
                       <ImageWithFallback src={service.imageUrl} alt={service.title} className="w-full h-full object-cover" />
                     ) : (
@@ -155,11 +155,14 @@ export default function App() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 text-sm leading-tight truncate">{service.title}</h3>
+                    <h3 className="font-semibold text-[14px] text-gray-900 truncate">{service.title}</h3>
                     {service.description && (
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">{service.description}</p>
+                      <p className="text-[12px] text-gray-500 mt-0.5 line-clamp-1">{service.description}</p>
                     )}
                   </div>
+                  <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               ))}
             </div>
@@ -167,38 +170,49 @@ export default function App() {
         </div>
       )}
 
-      {/* ── Main content (hidden while searching) ─────────────────────── */}
+      {/* ── Main content (hidden while searching) ───────────────────────── */}
       {!isSearching && (
         <>
-          {/* Discover Banners */}
-          <div className="px-6 pt-8 pb-6 bg-gray-50">
-            <h2 className="text-2xl font-bold mb-5 text-gray-900">Discover</h2>
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+          {/* ── Discover Banners ──────────────────────────────────────────── */}
+          <div className="bg-white mb-2 px-4 pt-4 pb-5">
+            <h2 className="text-[17px] font-semibold text-gray-900 mb-3">Discover</h2>
+            <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
               {banners.length === 0 ? (
-                <div className="flex-shrink-0 w-[340px] h-[160px] bg-gradient-to-br from-[#2a3d4d] to-[#6d5556] rounded-3xl p-6 flex items-center justify-center shadow-lg">
-                  <p className="text-white text-xl font-bold opacity-50">Loading...</p>
+                <div
+                  className="flex-shrink-0 w-[260px] rounded-2xl p-4 flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #2a3d4d, #6d5556)', minHeight: '120px' }}
+                >
+                  <p className="text-white text-sm opacity-50">Loading...</p>
                 </div>
               ) : (
                 banners.map((banner) => (
                   <div
                     key={banner.id}
-                    className="flex-shrink-0 w-[340px] rounded-3xl p-6 relative overflow-hidden shadow-lg cursor-pointer"
+                    className="flex-shrink-0 w-[260px] rounded-2xl p-4 relative overflow-hidden shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
                     style={{
                       background: banner.gradientFrom && banner.gradientTo
                         ? `linear-gradient(135deg, ${banner.gradientFrom}, ${banner.gradientTo})`
                         : banner.gradientFrom || '#2a3d4d',
-                      minHeight: '160px',
+                      minHeight: '120px',
                     }}
                     onClick={() => banner.linkUrl && window.open(banner.linkUrl, '_blank')}
                   >
                     {banner.imageUrl && (
-                      <img src={banner.imageUrl} alt={banner.title || ''} className="absolute right-0 bottom-0 w-[180px] h-[160px] object-contain" />
+                      <img
+                        src={banner.imageUrl}
+                        alt={banner.title || ''}
+                        className="absolute right-0 bottom-0 w-[130px] h-[120px] object-contain"
+                      />
                     )}
                     <div className="relative z-10">
-                      {banner.title && <h3 className="text-white text-2xl font-bold mb-1">{banner.title}</h3>}
-                      {banner.subtitle && <p className="text-white/80 text-base mb-3">{banner.subtitle}</p>}
+                      {banner.title && (
+                        <h3 className="text-white text-[17px] font-bold mb-0.5 leading-snug">{banner.title}</h3>
+                      )}
+                      {banner.subtitle && (
+                        <p className="text-white/80 text-[12px] mb-2">{banner.subtitle}</p>
+                      )}
                       {banner.offerText && (
-                        <div className="inline-block bg-pink-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md">
+                        <div className="inline-block bg-pink-600 text-white text-[11px] font-bold px-3 py-1 rounded-full">
                           {banner.offerText}
                         </div>
                       )}
@@ -209,61 +223,84 @@ export default function App() {
             </div>
           </div>
 
-          {/* Categories */}
-          <div className="px-6 py-6 bg-gray-50">
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-2xl font-bold text-gray-900">Categories</h2>
+          {/* ── Categories ────────────────────────────────────────────────── */}
+          <div className="bg-white mb-2 px-4 pt-4 pb-5">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-[17px] font-semibold text-gray-900">Categories</h2>
               <button
                 onClick={() => setIsLocationModalOpen(true)}
-                className="flex items-center gap-1.5 text-green-600 text-sm font-semibold hover:text-green-700 transition-colors"
+                className="flex items-center gap-1 text-[#5a9e3a] text-[13px] font-medium active:opacity-70"
               >
-                <MapPin className="w-4 h-4" />
-                {selectedLocation ? selectedLocation.name : 'All Locations'}
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <MapPin className="w-3.5 h-3.5" />
+                {selectedLocation ? selectedLocation.name : 'All'}
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-              {categories.map((category) => (
-                <div
-                  key={category.id}
-                  className="flex-shrink-0 bg-white rounded-2xl p-6 w-30 h-30 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => openCategoryModal(category)}
-                >
-                  <div className="text-6xl mb-3">{category.icon || '📦'}</div>
-                  <div className="text-sm text-center font-semibold text-gray-800">
-                    {category.displayName || category.name}
-                  </div>
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-3">
+              {categories.map((category, idx) => {
+                const bgColors = [
+                  '#e6f0d4', '#fce8e8', '#dceee5', '#e8f4ec',
+                  '#eee8f8', '#fef5e4', '#e8f0fc', '#fde8f4',
+                  '#e4f4f8', '#f8f4e4', '#ffe8e0', '#e8fce8',
+                ];
+                return (
+                  <button
+                    key={category.id}
+                    className="rounded-[18px] p-4 relative overflow-hidden text-left active:scale-[0.97] transition-transform"
+                    style={{ backgroundColor: bgColors[idx % bgColors.length], minHeight: '110px' }}
+                    onClick={() => openCategoryModal(category)}
+                  >
+                    <div className="relative z-10 max-w-[58%]">
+                      <h3 className="font-bold text-[15px] text-gray-800 leading-snug">
+                        {category.displayName || category.name}
+                      </h3>
+                      <p className="text-[12px] text-gray-400 mt-1 font-medium">Tap Here</p>
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-[80px] h-[80px] flex items-end justify-end select-none">
+                      {category.imageUrl ? (
+                        <img
+                          src={category.imageUrl}
+                          alt=""
+                          className="w-full h-full object-contain object-bottom"
+                        />
+                      ) : (
+                        <span className="text-[58px] leading-none">{category.icon || '📦'}</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Popular Partners */}
+          {/* ── Popular Partners ──────────────────────────────────────────── */}
           {popularPartners.length > 0 && (
-            <div className="px-6 py-6 bg-gray-50">
-              <h2 className="text-2xl font-bold mb-5 text-gray-900">Popular</h2>
-              <div className="overflow-x-auto pb-2 scrollbar-hide">
-                <div className="flex flex-col gap-4" style={{ minWidth: 'max-content' }}>
+            <div className="bg-white mb-2 px-4 py-4">
+              <h2 className="text-[17px] font-semibold text-gray-900 mb-3">Popular</h2>
+              <div className="overflow-x-auto pb-1 scrollbar-hide">
+                <div className="flex flex-col gap-2.5" style={{ minWidth: 'max-content' }}>
                   {[0, 1].map((rowIdx) => {
                     const rowCards = popularPartners.slice(rowIdx * 3, rowIdx * 3 + 3);
                     if (rowCards.length === 0) return null;
                     return (
-                      <div key={rowIdx} className="flex gap-4">
+                      <div key={rowIdx} className="flex gap-2.5">
                         {rowCards.map((card) => (
                           <div
                             key={card.id}
-                            className="flex-shrink-0 rounded-2xl p-5 relative overflow-hidden w-[160px] h-[120px] shadow-md hover:shadow-lg transition-all cursor-pointer border-2"
+                            className="flex-shrink-0 rounded-2xl p-3.5 relative overflow-hidden w-[140px] h-[88px] cursor-pointer active:scale-[0.97] transition-transform border"
                             style={{
                               background: card.popularBgColor || '#f5f3d7',
                               borderColor: card.popularBorderColor || 'transparent',
                             }}
                           >
-                            <h3 className="font-bold text-base mb-1 text-gray-800">{card.name}</h3>
-                            {card.description && <p className="text-sm text-gray-600">{card.description}</p>}
+                            <h3 className="font-semibold text-[13px] text-gray-800 leading-tight">{card.name}</h3>
+                            {card.description && (
+                              <p className="text-[11px] text-gray-600 mt-0.5 line-clamp-1">{card.description}</p>
+                            )}
                             {card.popularEmoji && (
-                              <div className="absolute -right-2 -bottom-2 text-5xl">{card.popularEmoji}</div>
+                              <div className="absolute -right-1 -bottom-2 text-[38px] leading-none">{card.popularEmoji}</div>
                             )}
                           </div>
                         ))}
@@ -275,34 +312,34 @@ export default function App() {
             </div>
           )}
 
-          {/* New Partners */}
+          {/* ── New Partners ──────────────────────────────────────────────── */}
           {newPartners.length > 0 && (
-            <div className="px-6 py-6 bg-gray-50">
-              <h2 className="text-2xl font-bold mb-5 text-gray-900">New Partner</h2>
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="bg-white mb-2 px-4 py-4">
+              <h2 className="text-[17px] font-semibold text-gray-900 mb-3">New Partner</h2>
+              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                 {newPartners.map((partner) => (
                   <div
                     key={partner.id}
-                    className="flex-shrink-0 bg-white rounded-2xl p-5 w-80 shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center gap-4 relative"
+                    className="flex-shrink-0 bg-gray-50 rounded-2xl p-3.5 w-[210px] cursor-pointer flex items-center gap-3 relative active:scale-[0.98] transition-transform border border-gray-100"
                   >
                     <div
-                      className="w-14 h-14 rounded-full flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden"
+                      className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden"
                       style={{ background: partner.newBgColor || '#f0f4ff' }}
                     >
                       {partner.icon?.startsWith('http') ? (
-                        <img src={partner.icon} alt={partner.name || ''} className="w-10 h-10 object-contain" />
+                        <img src={partner.icon} alt={partner.name || ''} className="w-9 h-9 object-contain" />
                       ) : (
                         <span>{partner.icon || '🏦'}</span>
                       )}
                     </div>
-                    <div className="flex-1 pr-12">
-                      <h3 className="font-bold mb-1.5 text-gray-900">{partner.name}</h3>
+                    <div className="flex-1 min-w-0 pr-6">
+                      <h3 className="font-semibold text-[13px] text-gray-900 truncate">{partner.name}</h3>
                       {partner.description && (
-                        <p className="text-xs text-gray-600 leading-relaxed">{partner.description}</p>
+                        <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">{partner.description}</p>
                       )}
                     </div>
                     {partner.newBadge && (
-                      <div className="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                      <div className="absolute top-2.5 right-2.5 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                         {partner.newBadge}
                       </div>
                     )}
@@ -312,50 +349,47 @@ export default function App() {
             </div>
           )}
 
-          {/* Per-Category Service Sections */}
+          {/* ── Per-Category Service Sections ─────────────────────────────── */}
           {categoryPreviewSections.map(({ category, services }) =>
             services.length > 0 ? (
-              <div key={category.id} className="bg-gray-50 px-6 py-6">
-                <div className="flex justify-between items-center mb-5">
-                  <h2 className="text-2xl font-bold text-gray-900">{category.displayName || category.name}</h2>
+              <div key={category.id} className="bg-white mb-2 px-4 py-4">
+                <div className="flex justify-between items-center mb-3">
+                  <h2 className="text-[17px] font-semibold text-gray-900">
+                    {category.displayName || category.name}
+                  </h2>
                   <button
                     onClick={() => openCategoryModal(category)}
-                    className="text-green-600 text-sm font-semibold hover:text-green-700 transition-colors"
+                    className="text-[#5a9e3a] text-[13px] font-medium active:opacity-70"
                   >
                     See All
                   </button>
                 </div>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                   {services.map((service) => (
                     <div
                       key={service.id}
-                      className="flex-shrink-0 bg-white rounded-2xl p-5 w-80 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                      className="flex-shrink-0 bg-gray-50 rounded-2xl overflow-hidden w-[140px] cursor-pointer active:scale-[0.97] transition-transform border border-gray-100"
                     >
-                      <div className="flex gap-4">
-                        {service.imageUrl ? (
-                          <ImageWithFallback
-                            src={service.imageUrl}
-                            alt={service.title}
-                            className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 text-4xl">
-                            {service.icon || '📦'}
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <div className="flex items-start gap-2 mb-2">
-                            {service.icon && (
-                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span className="text-xl">{service.icon}</span>
-                              </div>
-                            )}
-                            <h3 className="font-bold text-sm text-gray-900 leading-tight">{service.title}</h3>
-                          </div>
-                          {service.description && (
-                            <p className="text-xs text-gray-600 leading-relaxed">{service.description}</p>
-                          )}
+                      {service.imageUrl ? (
+                        <ImageWithFallback
+                          src={service.imageUrl}
+                          alt={service.title}
+                          className="w-full h-[90px] object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-[90px] bg-gray-100 flex items-center justify-center text-[36px]">
+                          {service.icon || '📦'}
                         </div>
+                      )}
+                      <div className="p-2.5">
+                        <h3 className="font-semibold text-[12px] text-gray-900 leading-tight truncate">
+                          {service.title}
+                        </h3>
+                        {service.description && (
+                          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">
+                            {service.description}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -363,90 +397,104 @@ export default function App() {
               </div>
             ) : null
           )}
+
+          {/* Bottom spacer */}
+          <div className="h-6" />
         </>
       )}
 
-      {/* ── Location Modal ─────────────────────────────────────────────── */}
+      {/* ── Location Modal ───────────────────────────────────────────────── */}
       {isLocationModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsLocationModalOpen(false)} />
-          <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl" style={{ animation: 'slideUpModal 0.3s ease-out' }}>
-            <div className="pt-3 pb-2 flex justify-center">
-              <div className="w-12 h-1 bg-gray-300 rounded-full" />
+          <div className="absolute inset-0 bg-black/40" onClick={() => setIsLocationModalOpen(false)} />
+          <div
+            className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl"
+            style={{ animation: 'slideUpModal 0.28s ease-out' }}
+          >
+            {/* Drag handle */}
+            <div className="pt-3 pb-1 flex justify-center">
+              <div className="w-10 h-1 bg-gray-200 rounded-full" />
             </div>
-            <div className="px-6 pt-4 pb-6">
-              <h2 className="text-2xl font-bold text-gray-800 text-center">Choose Location</h2>
+            <div className="px-5 pt-3 pb-4 border-b border-gray-100">
+              <h2 className="text-[18px] font-semibold text-gray-900 text-center">Choose Location</h2>
             </div>
-            <div className="px-6 pb-8">
-              <div className="space-y-0">
-                <div>
+            <div className="px-5 pb-8">
+              <div>
+                <button
+                  onClick={() => { setSelectedLocation(null); setIsLocationModalOpen(false); }}
+                  className="w-full flex items-center justify-between py-4 active:bg-gray-50 transition-colors"
+                >
+                  <span className="text-[15px] text-gray-800">All Locations</span>
+                  {selectedLocation === null && (
+                    <div className="w-6 h-6 bg-[#5a9e3a] rounded-full flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+                <div className="border-t border-gray-100" />
+              </div>
+              {locations.map((location, index) => (
+                <div key={location.id}>
                   <button
-                    onClick={() => { setSelectedLocation(null); setIsLocationModalOpen(false); }}
-                    className="w-full flex items-center justify-between py-5 hover:bg-gray-50 transition-colors"
+                    onClick={() => { setSelectedLocation(location); setIsLocationModalOpen(false); }}
+                    className="w-full flex items-center justify-between py-4 active:bg-gray-50 transition-colors"
                   >
-                    <span className="text-gray-700 text-lg font-normal">All Locations</span>
-                    {selectedLocation === null && (
-                      <div className="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center gap-3">
+                      {location.icon && <span className="text-[18px]">{location.icon}</span>}
+                      <span className="text-[15px] text-gray-800">{location.name}</span>
+                    </div>
+                    {selectedLocation?.id === location.id && (
+                      <div className="w-6 h-6 bg-[#5a9e3a] rounded-full flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                     )}
                   </button>
-                  <div className="border-t border-gray-200" />
+                  {index < locations.length - 1 && <div className="border-t border-gray-100" />}
                 </div>
-                {locations.map((location, index) => (
-                  <div key={location.id}>
-                    <button
-                      onClick={() => { setSelectedLocation(location); setIsLocationModalOpen(false); }}
-                      className="w-full flex items-center justify-between py-5 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        {location.icon && <span className="text-xl">{location.icon}</span>}
-                        <span className="text-gray-700 text-lg font-normal">{location.name}</span>
-                      </div>
-                      {selectedLocation?.id === location.id && (
-                        <div className="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                    {index < locations.length - 1 && <div className="border-t border-gray-200" />}
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
-            <div className="h-6 flex justify-center pb-4">
+            {/* Home indicator */}
+            <div className="pb-6 flex justify-center">
               <div className="w-32 h-1 bg-gray-800 rounded-full" />
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Category Modal ─────────────────────────────────────────────── */}
+      {/* ── Category Modal ───────────────────────────────────────────────── */}
       {isCategoriesModalOpen && selectedCategory && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsCategoriesModalOpen(false)} />
+          <div className="absolute inset-0 bg-black/40" onClick={() => setIsCategoriesModalOpen(false)} />
           <div
             className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl overflow-hidden"
-            style={{ animation: 'slideUpModal 0.3s ease-out', maxHeight: '85vh' }}
+            style={{ animation: 'slideUpModal 0.28s ease-out', maxHeight: '88vh' }}
           >
-            {/* Sticky header + search */}
-            <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-3">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">{selectedCategory.displayName || selectedCategory.name}</h2>
+            {/* Sticky header */}
+            <div className="sticky top-0 bg-white z-10">
+              {/* Drag handle */}
+              <div className="pt-3 pb-0 flex justify-center">
+                <div className="w-10 h-1 bg-gray-200 rounded-full" />
+              </div>
+              <div className="px-5 pt-3 pb-3 flex justify-between items-center">
+                <h2 className="text-[18px] font-semibold text-gray-900">
+                  {selectedCategory.displayName || selectedCategory.name}
+                </h2>
                 <button
                   onClick={() => setIsCategoriesModalOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors text-gray-400 text-xl leading-none"
+                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors text-gray-400"
                 >
-                  ✕
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
 
-              {/* key on the wrapper re-mounts SearchBar when category changes, resetting internal query */}
-              <div key={selectedCategory.id}>
+              {/* Search bar — key on wrapper resets internal query on category change */}
+              <div key={selectedCategory.id} className="px-4 pb-3">
                 <SearchBar
                   mode="static"
                   data={categoryServices}
@@ -456,47 +504,56 @@ export default function App() {
                   autoFocus={false}
                 />
               </div>
+              <div className="border-b border-gray-100" />
             </div>
 
             {/* Service list */}
-            <div className="px-4 pb-8 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 148px)' }}>
+            <div className="overflow-y-auto" style={{ maxHeight: 'calc(88vh - 160px)' }}>
               {loadingServices ? (
-                <div className="flex justify-center py-12 text-gray-400">Loading...</div>
+                <div className="flex justify-center py-12 text-gray-400 text-[14px]">Loading...</div>
               ) : filteredCategoryServices.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                   <span className="text-4xl mb-3">🔍</span>
-                  <p className="font-medium">
+                  <p className="text-[15px] font-medium">
                     {categorySearchQuery.trim() ? 'No results found' : 'No services available'}
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3 pt-2">
+                <div className="divide-y divide-gray-50">
                   {filteredCategoryServices.map((service) => (
-                    <div key={service.id} className="bg-gray-100 rounded-2xl p-4 flex gap-4 hover:bg-gray-200 transition-colors cursor-pointer">
-                      {service.imageUrl ? (
-                        <ImageWithFallback src={service.imageUrl} alt={service.title} className="w-24 h-24 rounded-xl object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-24 h-24 rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0 text-4xl">
-                          {service.icon || '📦'}
-                        </div>
-                      )}
-                      <div className="flex-1 flex items-start gap-3">
-                        {service.icon && (
-                          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <span className="text-2xl">{service.icon}</span>
-                          </div>
+                    <div
+                      key={service.id}
+                      className="flex items-center gap-3.5 px-5 py-3.5 hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden text-2xl">
+                        {service.imageUrl ? (
+                          <ImageWithFallback
+                            src={service.imageUrl}
+                            alt={service.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          service.icon || '📦'
                         )}
-                        <div className="flex-1">
-                          <h3 className="text-gray-900 font-bold text-base mb-2 leading-tight">{service.title}</h3>
-                          {service.description && (
-                            <p className="text-gray-600 text-sm leading-relaxed">{service.description}</p>
-                          )}
-                        </div>
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-[14px] text-gray-900 truncate">{service.title}</h3>
+                        {service.description && (
+                          <p className="text-[12px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">
+                            {service.description}
+                          </p>
+                        )}
+                      </div>
+                      <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   ))}
                 </div>
               )}
+
+              {/* Home indicator space */}
+              <div className="h-8" />
             </div>
           </div>
         </div>
@@ -511,12 +568,20 @@ export default function App() {
           from { opacity: 0; transform: scaleX(0.6); transform-origin: right; }
           to { opacity: 1; transform: scaleX(1); }
         }
+        .line-clamp-1 {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );

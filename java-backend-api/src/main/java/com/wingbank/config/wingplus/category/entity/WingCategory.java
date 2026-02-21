@@ -22,6 +22,9 @@ public class WingCategory extends AuditEntity {
 
     private String icon;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "sort_order")
     private int sortOrder = 0;
 

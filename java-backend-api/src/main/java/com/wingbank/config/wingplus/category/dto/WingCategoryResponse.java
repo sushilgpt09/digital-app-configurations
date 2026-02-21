@@ -12,6 +12,7 @@ public class WingCategoryResponse {
     private UUID id;
     private String key;
     private String icon;
+    private String imageUrl;
     private int sortOrder;
     private String status;
     private Map<String, WingCategoryTranslationData> translations;

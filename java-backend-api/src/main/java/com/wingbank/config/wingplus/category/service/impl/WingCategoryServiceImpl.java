@@ -67,7 +67,7 @@ public class WingCategoryServiceImpl implements WingCategoryService {
     }
 
     private void applyFields(WingCategory e, WingCategoryRequest req) {
-        e.setKey(req.getKey()); e.setIcon(req.getIcon()); e.setSortOrder(req.getSortOrder());
+        e.setKey(req.getKey()); e.setIcon(req.getIcon()); e.setImageUrl(req.getImageUrl()); e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingCategory.Status.valueOf(req.getStatus()) : WingCategory.Status.ACTIVE);
         if (req.getTranslations() != null) {
             Map<String, WingCategoryTranslation> existing = e.getTranslations().stream()
@@ -99,7 +99,7 @@ public class WingCategoryServiceImpl implements WingCategoryService {
             translations.put(t.getLanguageCode(), d);
         }
         return WingCategoryResponse.builder()
-                .id(e.getId()).key(e.getKey()).icon(e.getIcon())
+                .id(e.getId()).key(e.getKey()).icon(e.getIcon()).imageUrl(e.getImageUrl())
                 .sortOrder(e.getSortOrder()).status(e.getStatus().name())
                 .translations(translations).createdAt(e.getCreatedAt()).updatedAt(e.getUpdatedAt()).build();
     }

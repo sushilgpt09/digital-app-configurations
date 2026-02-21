@@ -91,7 +91,7 @@ public class WingPlusMobileController {
                 .map(c -> {
                     WingCategoryTranslation t = pickCategoryTranslation(c.getTranslations(), lang);
                     return CategoryDto.builder()
-                            .id(c.getId()).key(c.getKey()).icon(c.getIcon())
+                            .id(c.getId()).key(c.getKey()).icon(c.getIcon()).imageUrl(c.getImageUrl())
                             .name(t != null ? t.getName() : c.getKey())
                             .displayName(t != null ? t.getDisplayName() : c.getKey())
                             .sortOrder(c.getSortOrder()).build();
@@ -230,7 +230,7 @@ public class WingPlusMobileController {
         private String linkUrl; private int sortOrder;
     }
     @Data @Builder public static class CategoryDto {
-        private UUID id; private String key; private String icon;
+        private UUID id; private String key; private String icon; private String imageUrl;
         private String name; private String displayName; private int sortOrder;
     }
     @Data @Builder public static class ServiceDto {

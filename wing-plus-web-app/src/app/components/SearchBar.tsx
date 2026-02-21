@@ -133,7 +133,7 @@ export function SearchBar<T extends Filterable>({
         value={query}
         onChange={e => setQuery(e.target.value)}
         placeholder={placeholder}
-        className="w-full pl-9 pr-8 py-2.5 bg-gray-100 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-green-400 focus:bg-white transition-all"
+        className="w-full pl-9 pr-8 py-2 bg-gray-100 rounded-xl text-[13px] text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-[#a8c945]/50 focus:bg-white transition-all"
       />
       {query && (
         <button

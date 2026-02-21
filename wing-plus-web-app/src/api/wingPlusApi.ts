@@ -23,6 +23,7 @@ export interface CategoryDto {
   id: string;
   key: string;
   icon: string | null;
+  imageUrl: string | null;
   sortOrder: number;
   name: string;
   displayName: string | null;
