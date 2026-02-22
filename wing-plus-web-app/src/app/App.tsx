@@ -1,7 +1,7 @@
 import { ArrowLeft, MapPin } from 'lucide-react';
 import { ImageWithFallback } from './components/figma/ImageWithFallback';
 import { SearchBar } from './components/SearchBar';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import wingPlusApi, {
   LocationDto, BannerDto, CategoryDto, ServiceDto, PopularPartnerDto, NewPartnerDto,
 } from '../api/wingPlusApi';
@@ -37,6 +37,16 @@ export default function App() {
 
   // Flat list of all services across all cached categories — used by AppBar search
   const allServices = useMemo(() => Object.values(servicesCache).flat(), [servicesCache]);
+
+  // ── Banner carousel ───────────────────────────────────────────────────
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const bannerTouchStartX = useRef(0);
+
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    const timer = setInterval(() => setBannerIndex((i: number) => (i + 1) % banners.length), 3500);
+    return () => clearInterval(timer);
+  }, [banners.length]);
 
   useEffect(() => {
     Promise.all([
@@ -173,28 +183,62 @@ export default function App() {
       {/* ── Main content (hidden while searching) ───────────────────────── */}
       {!isSearching && (
         <>
-          {/* ── Discover Banners ──────────────────────────────────────────── */}
-          <div className="bg-white mb-2 px-4 pt-4 pb-5">
-            <h2 className="text-[17px] font-semibold text-gray-900 mb-3">Discover</h2>
-            <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-              {banners.length === 0 ? (
-                <div className="flex-shrink-0 w-[280px] h-[140px] rounded-2xl bg-gray-100 animate-pulse" />
-              ) : (
-                banners.map((banner) => (
-                  <div
-                    key={banner.id}
-                    className="flex-shrink-0 w-[280px] rounded-2xl overflow-hidden shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
-                    onClick={() => banner.linkUrl && window.open(banner.linkUrl, '_blank')}
-                  >
-                    {banner.imageUrl ? (
-                      <img src={banner.imageUrl} alt="" className="w-full h-[140px] object-cover" />
-                    ) : (
-                      <div className="w-full h-[140px] bg-gray-200 flex items-center justify-center text-gray-400 text-sm">No image</div>
-                    )}
+          {/* ── Discover Banners (carousel) ───────────────────────────────── */}
+          <div className="bg-white mb-2 pt-4 pb-5">
+            <h2 className="text-[17px] font-semibold text-gray-900 mb-3 px-4">Discover</h2>
+            {banners.length === 0 ? (
+              <div className="mx-4 h-[160px] rounded-2xl bg-gray-100 animate-pulse" />
+            ) : (
+              <div className="relative overflow-hidden">
+                {/* Slide track */}
+                <div
+                  className="flex transition-transform duration-500 ease-in-out"
+                  style={{ transform: `translateX(-${bannerIndex * 100}%)` }}
+                  onTouchStart={(e) => { bannerTouchStartX.current = e.touches[0].clientX; }}
+                  onTouchEnd={(e) => {
+                    const dx = e.changedTouches[0].clientX - bannerTouchStartX.current;
+                    if (Math.abs(dx) > 40) {
+                      setBannerIndex((i: number) =>
+                        dx < 0 ? (i + 1) % banners.length : (i - 1 + banners.length) % banners.length
+                      );
+                    }
+                  }}
+                >
+                  {banners.map((banner) => (
+                    <div
+                      key={banner.id}
+                      className="w-full flex-shrink-0 px-4"
+                      onClick={() => banner.linkUrl && window.open(banner.linkUrl, '_blank')}
+                    >
+                      <div className="rounded-2xl overflow-hidden cursor-pointer shadow-sm">
+                        {banner.imageUrl ? (
+                          <img src={banner.imageUrl} alt="" className="w-full h-[160px] object-cover" />
+                        ) : (
+                          <div className="w-full h-[160px] bg-gray-200 flex items-center justify-center text-gray-400 text-sm">No image</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Dot indicators */}
+                {banners.length > 1 && (
+                  <div className="flex justify-center items-center gap-1.5 mt-3">
+                    {banners.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setBannerIndex(i)}
+                        className={`rounded-full transition-all duration-300 ${
+                          i === bannerIndex
+                            ? 'w-5 h-1.5 bg-[#0277ff]'
+                            : 'w-1.5 h-1.5 bg-gray-300'
+                        }`}
+                      />
+                    ))}
                   </div>
-                ))
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* ── Categories ────────────────────────────────────────────────── */}
@@ -203,7 +247,7 @@ export default function App() {
               <h2 className="text-[17px] font-semibold text-gray-900">Categories</h2>
               <button
                 onClick={() => setIsLocationModalOpen(true)}
-                className="flex items-center gap-1 text-[#5a9e3a] text-[13px] font-medium active:opacity-70"
+                className="flex items-center gap-1 text-[#0277ff] text-[13px] font-medium active:opacity-70"
               >
                 <MapPin className="w-3.5 h-3.5" />
                 {selectedLocation ? selectedLocation.name : 'All'}
@@ -213,17 +257,12 @@ export default function App() {
               </button>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {categories.map((category, idx) => {
-                const bgColors = [
-                  '#e6f0d4', '#fce8e8', '#dceee5', '#e8f4ec',
-                  '#eee8f8', '#fef5e4', '#e8f0fc', '#fde8f4',
-                  '#e4f4f8', '#f8f4e4', '#ffe8e0', '#e8fce8',
-                ];
+              {categories.map((category) => {
                 return (
                   <button
                     key={category.id}
-                    className="rounded-[18px] p-4 relative overflow-hidden text-left active:scale-[0.97] transition-transform"
-                    style={{ backgroundColor: bgColors[idx % bgColors.length], minHeight: '110px' }}
+                    className="rounded-[18px] p-4 relative overflow-hidden text-left active:scale-[0.97] transition-transform bg-gray-50"
+                    style={{ minHeight: '110px' }}
                     onClick={() => openCategoryModal(category)}
                   >
                     <div className="relative z-10 max-w-[58%]">
@@ -333,7 +372,7 @@ export default function App() {
                   </h2>
                   <button
                     onClick={() => openCategoryModal(category)}
-                    className="text-[#5a9e3a] text-[13px] font-medium active:opacity-70"
+                    className="text-[#0277ff] text-[13px] font-medium active:opacity-70"
                   >
                     See All
                   </button>
@@ -400,7 +439,7 @@ export default function App() {
                 >
                   <span className="text-[15px] text-gray-800">All Locations</span>
                   {selectedLocation === null && (
-                    <div className="w-6 h-6 bg-[#5a9e3a] rounded-full flex items-center justify-center">
+                    <div className="w-6 h-6 bg-[#0277ff] rounded-full flex items-center justify-center">
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
@@ -420,7 +459,7 @@ export default function App() {
                       <span className="text-[15px] text-gray-800">{location.name}</span>
                     </div>
                     {selectedLocation?.id === location.id && (
-                      <div className="w-6 h-6 bg-[#5a9e3a] rounded-full flex items-center justify-center">
+                      <div className="w-6 h-6 bg-[#0277ff] rounded-full flex items-center justify-center">
                         <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
