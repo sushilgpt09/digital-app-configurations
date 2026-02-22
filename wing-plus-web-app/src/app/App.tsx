@@ -53,16 +53,23 @@ export default function App() {
       wingPlusApi.getLocations(LANG),
       wingPlusApi.getBanners(LANG),
       wingPlusApi.getCategories(LANG),
-      wingPlusApi.getPopularPartners(LANG),
-      wingPlusApi.getNewPartners(LANG),
-    ]).then(([loc, ban, cat, pop, newP]) => {
+    ]).then(([loc, ban, cat]) => {
       setLocations(loc.data.data || []);
       setBanners(ban.data.data || []);
       setCategories(cat.data.data || []);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const locationId = selectedLocation?.id;
+    Promise.all([
+      wingPlusApi.getPopularPartners(LANG, locationId),
+      wingPlusApi.getNewPartners(LANG, locationId),
+    ]).then(([pop, newP]) => {
       setPopularPartners(pop.data.data || []);
       setNewPartners(newP.data.data || []);
     }).catch(() => {});
-  }, []);
+  }, [selectedLocation]);
 
   // Preload services for all categories
   useEffect(() => {

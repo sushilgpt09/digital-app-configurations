@@ -72,11 +72,11 @@ const wingPlusApi = {
   getCategoryServices: (categoryId: string, lang = 'en') =>
     api.get<{ data: ServiceDto[] }>(`/categories/${categoryId}/services`, { params: { lang } }),
 
-  getPopularPartners: (lang = 'en') =>
-    api.get<{ data: PopularPartnerDto[] }>('/popular-partners', { params: { lang } }),
+  getPopularPartners: (lang = 'en', locationId?: string) =>
+    api.get<{ data: PopularPartnerDto[] }>('/popular-partners', { params: { lang, ...(locationId ? { locationId } : {}) } }),
 
-  getNewPartners: (lang = 'en') =>
-    api.get<{ data: NewPartnerDto[] }>('/new-partners', { params: { lang } }),
+  getNewPartners: (lang = 'en', locationId?: string) =>
+    api.get<{ data: NewPartnerDto[] }>('/new-partners', { params: { lang, ...(locationId ? { locationId } : {}) } }),
 };
 
 export default wingPlusApi;

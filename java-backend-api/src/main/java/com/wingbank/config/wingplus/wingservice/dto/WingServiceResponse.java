@@ -8,6 +8,7 @@ import java.util.UUID;
 @Data @Builder
 public class WingServiceResponse {
     private UUID id;
+    private UUID locationId;
     private String icon;
     private String imageUrl;
     @JsonProperty("isPopular") private boolean isPopular;

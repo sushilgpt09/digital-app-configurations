@@ -2,8 +2,10 @@ package com.wingbank.config.wingplus.wingservice.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.util.Map;
+import java.util.UUID;
 @Data
 public class WingServiceRequest {
+    private UUID locationId;
     private String icon;
     private String imageUrl;
     @JsonProperty("isPopular") private boolean isPopular;

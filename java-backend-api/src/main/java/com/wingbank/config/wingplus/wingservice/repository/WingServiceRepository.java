@@ -20,7 +20,11 @@ public interface WingServiceRepository extends JpaRepository<WingService, UUID> 
 
     List<WingService> findByIsPopularAndStatusOrderByPopularSortOrder(boolean isPopular, WingService.Status status);
 
+    List<WingService> findByIsPopularAndStatusAndLocationIdOrderByPopularSortOrder(boolean isPopular, WingService.Status status, UUID locationId);
+
     List<WingService> findByIsNewAndStatusOrderByNewSortOrder(boolean isNew, WingService.Status status);
+
+    List<WingService> findByIsNewAndStatusAndLocationIdOrderByNewSortOrder(boolean isNew, WingService.Status status, UUID locationId);
 
     @Query(value = "SELECT * FROM wing_services WHERE deleted = false " +
            "AND (:status IS NULL OR status = CAST(:status AS TEXT)) " +

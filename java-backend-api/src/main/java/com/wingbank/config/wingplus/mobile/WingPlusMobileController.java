@@ -136,10 +136,12 @@ public class WingPlusMobileController {
     @GetMapping("/popular-partners")
     @Operation(summary = "Get popular partners with display config (localized)")
     public ResponseEntity<ApiResponse<List<PopularPartnerDto>>> getPopularPartners(
-            @RequestParam(defaultValue = "en") String lang) {
-        List<PopularPartnerDto> data = serviceRepository
-                .findByIsPopularAndStatusOrderByPopularSortOrder(true, WingService.Status.ACTIVE)
-                .stream()
+            @RequestParam(defaultValue = "en") String lang,
+            @RequestParam(required = false) UUID locationId) {
+        List<WingService> services = locationId != null
+                ? serviceRepository.findByIsPopularAndStatusAndLocationIdOrderByPopularSortOrder(true, WingService.Status.ACTIVE, locationId)
+                : serviceRepository.findByIsPopularAndStatusOrderByPopularSortOrder(true, WingService.Status.ACTIVE);
+        List<PopularPartnerDto> data = services.stream()
                 .map(s -> {
                     WingServiceTranslation t = pickServiceTranslation(s.getTranslations(), lang);
                     return PopularPartnerDto.builder()
@@ -161,10 +163,12 @@ public class WingPlusMobileController {
     @GetMapping("/new-partners")
     @Operation(summary = "Get new partners with display config (localized)")
     public ResponseEntity<ApiResponse<List<NewPartnerDto>>> getNewPartners(
-            @RequestParam(defaultValue = "en") String lang) {
-        List<NewPartnerDto> data = serviceRepository
-                .findByIsNewAndStatusOrderByNewSortOrder(true, WingService.Status.ACTIVE)
-                .stream()
+            @RequestParam(defaultValue = "en") String lang,
+            @RequestParam(required = false) UUID locationId) {
+        List<WingService> services = locationId != null
+                ? serviceRepository.findByIsNewAndStatusAndLocationIdOrderByNewSortOrder(true, WingService.Status.ACTIVE, locationId)
+                : serviceRepository.findByIsNewAndStatusOrderByNewSortOrder(true, WingService.Status.ACTIVE);
+        List<NewPartnerDto> data = services.stream()
                 .map(s -> {
                     WingServiceTranslation t = pickServiceTranslation(s.getTranslations(), lang);
                     return NewPartnerDto.builder()

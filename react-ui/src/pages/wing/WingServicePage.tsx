@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, FormEvent } from 'react';
 import { Plus } from 'lucide-react';
 import { wingServicesApi } from '../../api/wingServices.api';
-import { WingService, WingServiceRequest, WingServiceTranslationData } from '../../types/wing.types';
+import { wingLocationsApi } from '../../api/wingLocations.api';
+import { WingService, WingServiceRequest, WingServiceTranslationData, WingLocation } from '../../types/wing.types';
 import { PagedResponse } from '../../types/api.types';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchFilter } from '../../components/common/SearchFilter';
@@ -22,15 +23,23 @@ function PartnerFormModal({
   isOpen: boolean; onClose: () => void; onSuccess: () => void; item?: WingService | null;
 }) {
   const langs = useAppLanguages();
-  const [form, setForm] = useState<WingServiceRequest>({ icon: '', imageUrl: '', isPopular: false, isNew: false, sortOrder: 0, status: 'ACTIVE', translations: {} });
+  const [locations, setLocations] = useState<WingLocation[]>([]);
+  const [form, setForm] = useState<WingServiceRequest>({ locationId: '', icon: '', imageUrl: '', isPopular: false, isNew: false, sortOrder: 0, status: 'ACTIVE', translations: {} });
   const [activeLang, setActiveLang] = useState('en');
   const [loading, setLoading] = useState(false);
   const isEdit = !!item;
 
   useEffect(() => {
+    wingLocationsApi.getAll({ page: 0, size: 100, status: 'ACTIVE' })
+      .then((r) => setLocations(r.data.data?.content || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const emptyTrans = Object.fromEntries(langs.map(l => [l.code, { ...EMPTY_TRANS }]));
     if (item) {
       setForm({
+        locationId: item.locationId || '',
         icon: item.icon || '',
         imageUrl: item.imageUrl || '',
         isPopular: item.isPopular,
@@ -40,7 +49,7 @@ function PartnerFormModal({
         translations: { ...emptyTrans, ...item.translations },
       });
     } else {
-      setForm({ icon: '', imageUrl: '', isPopular: false, isNew: false, sortOrder: 0, status: 'ACTIVE', translations: emptyTrans });
+      setForm({ locationId: '', icon: '', imageUrl: '', isPopular: false, isNew: false, sortOrder: 0, status: 'ACTIVE', translations: emptyTrans });
     }
     setActiveLang(langs[0]?.code || 'en');
   }, [item, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -68,6 +77,15 @@ function PartnerFormModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Partner' : 'Add Partner'}>
       <form onSubmit={handleSubmit}>
+        <SelectField
+          label="Location"
+          value={form.locationId || ''}
+          onChange={(e) => setForm({ ...form, locationId: e.target.value || undefined })}
+          options={[
+            { label: '— All Locations —', value: '' },
+            ...locations.map(l => ({ label: `${l.icon ? l.icon + ' ' : ''}${l.name}`, value: l.id })),
+          ]}
+        />
         <InputField label="Icon (emoji or URL)" value={form.icon || ''} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="🏦" />
         <InputField label="Image URL" value={form.imageUrl || ''} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." />
         <InputField label="Sort Order" type="number" value={String(form.sortOrder ?? 0)} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />

@@ -20,6 +20,9 @@ public class WingService extends AuditEntity {
     @Column(name = "category_id")
     private java.util.UUID categoryId;
 
+    @Column(name = "location_id")
+    private java.util.UUID locationId;
+
     private String icon;
 
     @Column(name = "image_url")

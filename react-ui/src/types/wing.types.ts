@@ -54,6 +54,7 @@ export interface WingServiceTranslationData {
 
 export interface WingService {
   id: string;
+  locationId: string | null;
   icon: string | null;
   imageUrl: string | null;
   isPopular: boolean;
@@ -76,6 +77,7 @@ export interface WingService {
 }
 
 export interface WingServiceRequest {
+  locationId?: string;
   icon?: string;
   imageUrl?: string;
   isPopular?: boolean;

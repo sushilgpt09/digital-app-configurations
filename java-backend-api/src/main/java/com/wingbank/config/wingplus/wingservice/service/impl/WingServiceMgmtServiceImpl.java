@@ -74,6 +74,7 @@ public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
     }
 
     private void applyFields(WingService e, WingServiceRequest req) {
+        e.setLocationId(req.getLocationId());
         e.setIcon(req.getIcon()); e.setImageUrl(req.getImageUrl());
         e.setPopular(req.isPopular()); e.setNew(req.isNew());
         e.setSortOrder(req.getSortOrder());
@@ -118,7 +119,7 @@ public class WingServiceMgmtServiceImpl implements WingServiceMgmtService {
             translations.put(t.getLanguageCode(), d);
         }
         return WingServiceResponse.builder()
-                .id(e.getId()).icon(e.getIcon()).imageUrl(e.getImageUrl())
+                .id(e.getId()).locationId(e.getLocationId()).icon(e.getIcon()).imageUrl(e.getImageUrl())
                 .isPopular(e.isPopular()).isNew(e.isNew())
                 .sortOrder(e.getSortOrder()).status(e.getStatus().name())
                 .popularSortOrder(e.getPopularSortOrder()).popularEmoji(e.getPopularEmoji())
