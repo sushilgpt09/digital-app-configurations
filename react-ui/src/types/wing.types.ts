@@ -97,16 +97,11 @@ export interface WingServiceRequest {
 
 // ── Banner ────────────────────────────────────────────────
 export interface WingBannerTranslationData {
-  title: string;
-  subtitle: string;
-  offerText: string;
+  imageUrl: string;
 }
 
 export interface WingBanner {
   id: string;
-  imageUrl: string | null;
-  gradientFrom: string | null;
-  gradientTo: string | null;
   linkUrl: string | null;
   sortOrder: number;
   status: string;
@@ -116,9 +111,6 @@ export interface WingBanner {
 }
 
 export interface WingBannerRequest {
-  imageUrl?: string;
-  gradientFrom?: string;
-  gradientTo?: string;
   linkUrl?: string;
   sortOrder?: number;
   status?: string;

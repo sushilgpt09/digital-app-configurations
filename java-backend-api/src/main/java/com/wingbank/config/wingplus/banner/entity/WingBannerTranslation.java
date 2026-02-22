@@ -23,9 +23,6 @@ public class WingBannerTranslation {
     @Column(name = "language_code", nullable = false)
     private String languageCode;
 
-    private String title;
-    private String subtitle;
-
-    @Column(name = "offer_text")
-    private String offerText;
+    @Column(name = "image_url")
+    private String imageUrl;
 }

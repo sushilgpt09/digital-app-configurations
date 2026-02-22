@@ -7,9 +7,6 @@ import java.util.UUID;
 @Data @Builder
 public class WingBannerResponse {
     private UUID id;
-    private String imageUrl;
-    private String gradientFrom;
-    private String gradientTo;
     private String linkUrl;
     private int sortOrder;
     private String status;

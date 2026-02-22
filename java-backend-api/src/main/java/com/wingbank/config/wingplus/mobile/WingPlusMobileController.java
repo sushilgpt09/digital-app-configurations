@@ -66,12 +66,7 @@ public class WingPlusMobileController {
                     WingBannerTranslation t = pickBannerTranslation(b.getTranslations(), lang);
                     return BannerDto.builder()
                             .id(b.getId())
-                            .title(t != null ? t.getTitle() : null)
-                            .subtitle(t != null ? t.getSubtitle() : null)
-                            .offerText(t != null ? t.getOfferText() : null)
-                            .imageUrl(b.getImageUrl())
-                            .gradientFrom(b.getGradientFrom())
-                            .gradientTo(b.getGradientTo())
+                            .imageUrl(t != null ? t.getImageUrl() : null)
                             .linkUrl(b.getLinkUrl())
                             .sortOrder(b.getSortOrder()).build();
                 })
@@ -225,9 +220,7 @@ public class WingPlusMobileController {
         private UUID id; private String name; private String icon; private int sortOrder;
     }
     @Data @Builder public static class BannerDto {
-        private UUID id; private String title; private String subtitle; private String offerText;
-        private String imageUrl; private String gradientFrom; private String gradientTo;
-        private String linkUrl; private int sortOrder;
+        private UUID id; private String imageUrl; private String linkUrl; private int sortOrder;
     }
     @Data @Builder public static class CategoryDto {
         private UUID id; private String key; private String icon; private String imageUrl;

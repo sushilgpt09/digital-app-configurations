@@ -9,14 +9,9 @@ export interface LocationDto {
 
 export interface BannerDto {
   id: string;
-  gradientFrom: string | null;
-  gradientTo: string | null;
   imageUrl: string | null;
   linkUrl: string | null;
   sortOrder: number;
-  title: string | null;
-  subtitle: string | null;
-  offerText: string | null;
 }
 
 export interface CategoryDto {

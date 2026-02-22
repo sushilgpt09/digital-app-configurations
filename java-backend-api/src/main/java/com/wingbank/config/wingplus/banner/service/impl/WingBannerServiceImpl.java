@@ -56,8 +56,7 @@ public class WingBannerServiceImpl implements WingBannerService {
     }
 
     private void applyFields(WingBanner e, WingBannerRequest req) {
-        e.setImageUrl(req.getImageUrl()); e.setGradientFrom(req.getGradientFrom());
-        e.setGradientTo(req.getGradientTo()); e.setLinkUrl(req.getLinkUrl());
+        e.setLinkUrl(req.getLinkUrl());
         e.setSortOrder(req.getSortOrder());
         e.setStatus(req.getStatus() != null ? WingBanner.Status.valueOf(req.getStatus()) : WingBanner.Status.ACTIVE);
         if (req.getTranslations() != null) {
@@ -67,11 +66,11 @@ public class WingBannerServiceImpl implements WingBannerService {
             req.getTranslations().forEach((lang, data) -> {
                 WingBannerTranslation t = existing.get(lang);
                 if (t != null) {
-                    t.setTitle(data.getTitle()); t.setSubtitle(data.getSubtitle()); t.setOfferText(data.getOfferText());
+                    t.setImageUrl(data.getImageUrl());
                 } else {
                     WingBannerTranslation newT = new WingBannerTranslation();
                     newT.setBanner(e); newT.setLanguageCode(lang);
-                    newT.setTitle(data.getTitle()); newT.setSubtitle(data.getSubtitle()); newT.setOfferText(data.getOfferText());
+                    newT.setImageUrl(data.getImageUrl());
                     e.getTranslations().add(newT);
                 }
             });
@@ -86,12 +85,11 @@ public class WingBannerServiceImpl implements WingBannerService {
         Map<String, WingBannerTranslationData> translations = new LinkedHashMap<>();
         for (WingBannerTranslation t : e.getTranslations()) {
             WingBannerTranslationData d = new WingBannerTranslationData();
-            d.setTitle(t.getTitle()); d.setSubtitle(t.getSubtitle()); d.setOfferText(t.getOfferText());
+            d.setImageUrl(t.getImageUrl());
             translations.put(t.getLanguageCode(), d);
         }
         return WingBannerResponse.builder()
-                .id(e.getId()).imageUrl(e.getImageUrl()).gradientFrom(e.getGradientFrom())
-                .gradientTo(e.getGradientTo()).linkUrl(e.getLinkUrl())
+                .id(e.getId()).linkUrl(e.getLinkUrl())
                 .sortOrder(e.getSortOrder()).status(e.getStatus().name())
                 .translations(translations).createdAt(e.getCreatedAt()).updatedAt(e.getUpdatedAt()).build();
     }

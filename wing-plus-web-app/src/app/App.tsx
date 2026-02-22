@@ -96,7 +96,7 @@ export default function App() {
     <div className="min-h-screen bg-[#f2f2f7] max-w-md mx-auto">
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-[#c4d962] to-[#a8c945] px-4 pt-8 pb-5 shadow-sm">
+      <div className="bg-gradient-to-br from-[#c4d962] to-[#0277ff] px-4 pt-8 pb-5 shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <button className="w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
@@ -178,45 +178,19 @@ export default function App() {
             <h2 className="text-[17px] font-semibold text-gray-900 mb-3">Discover</h2>
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
               {banners.length === 0 ? (
-                <div
-                  className="flex-shrink-0 w-[260px] rounded-2xl p-4 flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, #2a3d4d, #6d5556)', minHeight: '120px' }}
-                >
-                  <p className="text-white text-sm opacity-50">Loading...</p>
-                </div>
+                <div className="flex-shrink-0 w-[280px] h-[140px] rounded-2xl bg-gray-100 animate-pulse" />
               ) : (
                 banners.map((banner) => (
                   <div
                     key={banner.id}
-                    className="flex-shrink-0 w-[260px] rounded-2xl p-4 relative overflow-hidden shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
-                    style={{
-                      background: banner.gradientFrom && banner.gradientTo
-                        ? `linear-gradient(135deg, ${banner.gradientFrom}, ${banner.gradientTo})`
-                        : banner.gradientFrom || '#2a3d4d',
-                      minHeight: '120px',
-                    }}
+                    className="flex-shrink-0 w-[280px] rounded-2xl overflow-hidden shadow-sm cursor-pointer active:scale-[0.98] transition-transform"
                     onClick={() => banner.linkUrl && window.open(banner.linkUrl, '_blank')}
                   >
-                    {banner.imageUrl && (
-                      <img
-                        src={banner.imageUrl}
-                        alt={banner.title || ''}
-                        className="absolute right-0 bottom-0 w-[130px] h-[120px] object-contain"
-                      />
+                    {banner.imageUrl ? (
+                      <img src={banner.imageUrl} alt="" className="w-full h-[140px] object-cover" />
+                    ) : (
+                      <div className="w-full h-[140px] bg-gray-200 flex items-center justify-center text-gray-400 text-sm">No image</div>
                     )}
-                    <div className="relative z-10">
-                      {banner.title && (
-                        <h3 className="text-white text-[17px] font-bold mb-0.5 leading-snug">{banner.title}</h3>
-                      )}
-                      {banner.subtitle && (
-                        <p className="text-white/80 text-[12px] mb-2">{banner.subtitle}</p>
-                      )}
-                      {banner.offerText && (
-                        <div className="inline-block bg-pink-600 text-white text-[11px] font-bold px-3 py-1 rounded-full">
-                          {banner.offerText}
-                        </div>
-                      )}
-                    </div>
                   </div>
                 ))
               )}

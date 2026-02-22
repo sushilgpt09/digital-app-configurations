@@ -14,7 +14,7 @@ import { SelectField } from '../../components/forms/SelectField';
 import toast from 'react-hot-toast';
 import { useAppLanguages } from '../../hooks/useAppLanguages';
 
-const EMPTY_TRANS: WingBannerTranslationData = { title: '', subtitle: '', offerText: '' };
+const EMPTY_TRANS: WingBannerTranslationData = { imageUrl: '' };
 
 function BannerFormModal({
   isOpen, onClose, onSuccess, item,
@@ -22,7 +22,7 @@ function BannerFormModal({
   isOpen: boolean; onClose: () => void; onSuccess: () => void; item?: WingBanner | null;
 }) {
   const langs = useAppLanguages();
-  const [form, setForm] = useState<WingBannerRequest>({ imageUrl: '', gradientFrom: '', gradientTo: '', linkUrl: '', sortOrder: 0, status: 'ACTIVE', translations: {} });
+  const [form, setForm] = useState<WingBannerRequest>({ linkUrl: '', sortOrder: 0, status: 'ACTIVE', translations: {} });
   const [activeLang, setActiveLang] = useState('en');
   const [loading, setLoading] = useState(false);
   const isEdit = !!item;
@@ -31,24 +31,21 @@ function BannerFormModal({
     const emptyTrans = Object.fromEntries(langs.map(l => [l.code, { ...EMPTY_TRANS }]));
     if (item) {
       setForm({
-        imageUrl: item.imageUrl || '',
-        gradientFrom: item.gradientFrom || '',
-        gradientTo: item.gradientTo || '',
         linkUrl: item.linkUrl || '',
         sortOrder: item.sortOrder,
         status: item.status,
         translations: { ...emptyTrans, ...item.translations },
       });
     } else {
-      setForm({ imageUrl: '', gradientFrom: '', gradientTo: '', linkUrl: '', sortOrder: 0, status: 'ACTIVE', translations: emptyTrans });
+      setForm({ linkUrl: '', sortOrder: 0, status: 'ACTIVE', translations: emptyTrans });
     }
     setActiveLang(langs[0]?.code || 'en');
   }, [item, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const setTrans = (lang: string, field: keyof WingBannerTranslationData, val: string) => {
+  const setTrans = (lang: string, val: string) => {
     setForm((f) => ({
       ...f,
-      translations: { ...f.translations, [lang]: { ...((f.translations || {})[lang] || EMPTY_TRANS), [field]: val } },
+      translations: { ...f.translations, [lang]: { imageUrl: val } },
     }));
   };
 
@@ -63,25 +60,17 @@ function BannerFormModal({
   };
 
   const trans = form.translations || {};
+  const activeLangLabel = langs.find(l => l.code === activeLang)?.label || activeLang;
+  const previewUrl = trans[activeLang]?.imageUrl;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit Banner' : 'Add Banner'}>
       <form onSubmit={handleSubmit}>
-        <InputField label="Image URL" value={form.imageUrl || ''} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." />
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <InputField label="Gradient From" value={form.gradientFrom || ''} onChange={(e) => setForm({ ...form, gradientFrom: e.target.value })} placeholder="#1a1a2e" />
-            {form.gradientFrom && <div className="mt-1 h-4 rounded" style={{ background: form.gradientFrom }} />}
-          </div>
-          <div>
-            <InputField label="Gradient To" value={form.gradientTo || ''} onChange={(e) => setForm({ ...form, gradientTo: e.target.value })} placeholder="#16213e" />
-            {form.gradientTo && <div className="mt-1 h-4 rounded" style={{ background: form.gradientTo }} />}
-          </div>
-        </div>
         <InputField label="Link URL" value={form.linkUrl || ''} onChange={(e) => setForm({ ...form, linkUrl: e.target.value })} placeholder="https://..." />
         <InputField label="Sort Order" type="number" value={String(form.sortOrder ?? 0)} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />
         <SelectField label="Status" value={form.status || 'ACTIVE'} onChange={(e) => setForm({ ...form, status: e.target.value })} options={[{ label: 'Active', value: 'ACTIVE' }, { label: 'Inactive', value: 'INACTIVE' }]} />
 
+        {/* Per-language Image URL */}
         <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
           <div className="flex border-b border-gray-200">
             {langs.map((l) => (
@@ -92,9 +81,17 @@ function BannerFormModal({
             ))}
           </div>
           <div className="p-4 space-y-3">
-            <InputField label="Title" value={trans[activeLang]?.title || ''} onChange={(e) => setTrans(activeLang, 'title', e.target.value)} placeholder={`Banner title in ${langs.find(l => l.code === activeLang)?.label}`} />
-            <InputField label="Subtitle" value={trans[activeLang]?.subtitle || ''} onChange={(e) => setTrans(activeLang, 'subtitle', e.target.value)} placeholder="Short subtitle" />
-            <InputField label="Offer Text" value={trans[activeLang]?.offerText || ''} onChange={(e) => setTrans(activeLang, 'offerText', e.target.value)} placeholder="e.g. 0% fee" />
+            <InputField
+              label={`Image URL (${activeLangLabel})`}
+              value={trans[activeLang]?.imageUrl || ''}
+              onChange={(e) => setTrans(activeLang, e.target.value)}
+              placeholder="https://cdn.example.com/banner-en.jpg"
+            />
+            {previewUrl && (
+              <div className="rounded-xl overflow-hidden border border-gray-100">
+                <img src={previewUrl} alt="Preview" className="w-full h-[120px] object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -132,13 +129,14 @@ export function WingBannerPage() {
   const columns: Column<WingBanner>[] = [
     { key: 'index', header: '#', width: '60px', render: (_, i) => <span className="text-gray-500">{i + 1}</span> },
     {
-      key: 'gradient', header: 'GRADIENT', width: '80px', render: (b) => (
-        <div className="w-10 h-6 rounded" style={{ background: b.gradientFrom && b.gradientTo ? `linear-gradient(to right, ${b.gradientFrom}, ${b.gradientTo})` : b.gradientFrom || '#eee' }} />
-      )
+      key: 'image', header: 'IMAGE (EN)', width: '120px', render: (b) => {
+        const url = b.translations?.en?.imageUrl;
+        return url
+          ? <img src={url} alt="" className="w-24 h-14 rounded-lg object-cover border border-gray-100" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          : <div className="w-24 h-14 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 text-xs">No image</div>;
+      }
     },
-    { key: 'title', header: 'TITLE (EN)', render: (b) => <span className="font-medium">{b.translations?.en?.title || '—'}</span> },
-    { key: 'subtitle', header: 'SUBTITLE (EN)', render: (b) => <span className="text-sm text-gray-600">{b.translations?.en?.subtitle || '—'}</span> },
-    { key: 'offerText', header: 'OFFER', render: (b) => <span className="text-sm">{b.translations?.en?.offerText || '—'}</span> },
+    { key: 'linkUrl', header: 'LINK URL', render: (b) => <span className="text-sm text-gray-600 truncate max-w-[200px] block">{b.linkUrl || '—'}</span> },
     { key: 'sortOrder', header: 'ORDER', width: '80px', render: (b) => b.sortOrder },
     { key: 'status', header: 'STATUS', render: (b) => <StatusBadge status={b.status} /> },
   ];
