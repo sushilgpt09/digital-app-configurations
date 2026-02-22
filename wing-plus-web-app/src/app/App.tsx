@@ -292,35 +292,34 @@ export default function App() {
           {popularPartners.length > 0 && (
             <div className="bg-white mb-2 px-4 py-4">
               <h2 className="text-[17px] font-semibold text-gray-900 mb-3">Popular</h2>
-              <div className="overflow-x-auto pb-1 scrollbar-hide">
-                <div className="flex flex-col gap-2.5" style={{ minWidth: 'max-content' }}>
-                  {[0, 1].map((rowIdx) => {
-                    const rowCards = popularPartners.slice(rowIdx * 3, rowIdx * 3 + 3);
-                    if (rowCards.length === 0) return null;
-                    return (
-                      <div key={rowIdx} className="flex gap-2.5">
-                        {rowCards.map((card) => (
-                          <div
-                            key={card.id}
-                            className="flex-shrink-0 rounded-2xl p-3.5 relative overflow-hidden w-[140px] h-[88px] cursor-pointer active:scale-[0.97] transition-transform border"
-                            style={{
-                              background: card.popularBgColor || '#f5f3d7',
-                              borderColor: card.popularBorderColor || 'transparent',
-                            }}
-                          >
-                            <h3 className="font-semibold text-[13px] text-gray-800 leading-tight">{card.name}</h3>
-                            {card.description && (
-                              <p className="text-[11px] text-gray-600 mt-0.5 line-clamp-1">{card.description}</p>
-                            )}
-                            {card.popularEmoji && (
-                              <div className="absolute -right-1 -bottom-2 text-[38px] leading-none">{card.popularEmoji}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
-                </div>
+              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+                {popularPartners.map((card) => (
+                  <div
+                    key={card.id}
+                    className="flex-shrink-0 w-[140px] rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
+                  >
+                    {/* Image head */}
+                    <div className="w-full h-[100px] relative overflow-hidden">
+                      {card.imageUrl ? (
+                        <img src={card.imageUrl} alt={card.name || ''} className="w-full h-full object-cover" />
+                      ) : (
+                        <div
+                          className="w-full h-full flex items-center justify-center text-[44px]"
+                          style={{ background: card.popularBgColor || '#f5f3d7' }}
+                        >
+                          {card.popularEmoji || '🏦'}
+                        </div>
+                      )}
+                    </div>
+                    {/* Text */}
+                    <div className="p-2.5">
+                      <h3 className="font-semibold text-[12px] text-gray-900 truncate">{card.name}</h3>
+                      {card.description && (
+                        <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">{card.description}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -333,29 +332,37 @@ export default function App() {
                 {newPartners.map((partner) => (
                   <div
                     key={partner.id}
-                    className="flex-shrink-0 bg-gray-50 rounded-2xl p-3.5 w-[210px] cursor-pointer flex items-center gap-3 relative active:scale-[0.98] transition-transform border border-gray-100"
+                    className="flex-shrink-0 w-[140px] rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
                   >
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden"
-                      style={{ background: partner.newBgColor || '#f0f4ff' }}
-                    >
-                      {partner.icon?.startsWith('http') ? (
-                        <img src={partner.icon} alt={partner.name || ''} className="w-9 h-9 object-contain" />
+                    {/* Image head */}
+                    <div className="w-full h-[100px] relative overflow-hidden">
+                      {partner.imageUrl ? (
+                        <img src={partner.imageUrl} alt={partner.name || ''} className="w-full h-full object-cover" />
                       ) : (
-                        <span>{partner.icon || '🏦'}</span>
+                        <div
+                          className="w-full h-full flex items-center justify-center text-[44px]"
+                          style={{ background: partner.newBgColor || '#f0f4ff' }}
+                        >
+                          {partner.icon?.startsWith('http') ? (
+                            <img src={partner.icon} alt="" className="w-14 h-14 object-contain" />
+                          ) : (
+                            partner.icon || '🏦'
+                          )}
+                        </div>
+                      )}
+                      {partner.newBadge && (
+                        <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                          {partner.newBadge}
+                        </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0 pr-6">
-                      <h3 className="font-semibold text-[13px] text-gray-900 truncate">{partner.name}</h3>
+                    {/* Text */}
+                    <div className="p-2.5">
+                      <h3 className="font-semibold text-[12px] text-gray-900 truncate">{partner.name}</h3>
                       {partner.description && (
                         <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">{partner.description}</p>
                       )}
                     </div>
-                    {partner.newBadge && (
-                      <div className="absolute top-2.5 right-2.5 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                        {partner.newBadge}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
