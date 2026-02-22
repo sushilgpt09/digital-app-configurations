@@ -298,33 +298,34 @@ export default function App() {
           {/* ── Popular Partners ──────────────────────────────────────────── */}
           {popularPartners.length > 0 && (
             <div className="bg-white mb-2 px-4 py-4">
-              <h2 className="text-[17px] font-semibold text-gray-900 mb-3">Popular</h2>
-              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+              <h2 className="text-[17px] font-semibold text-gray-900 mb-4">Popular Partner</h2>
+              <div className="flex gap-5 overflow-x-auto pb-1 scrollbar-hide">
                 {popularPartners.map((card) => (
                   <div
                     key={card.id}
-                    className="flex-shrink-0 w-[140px] rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
+                    className="flex-shrink-0 w-[82px] flex flex-col items-center cursor-pointer active:scale-[0.95] transition-transform"
                   >
-                    {/* Image head */}
-                    <div className="w-full h-[100px] relative overflow-hidden">
-                      {card.imageUrl ? (
-                        <img src={card.imageUrl} alt={card.name || ''} className="w-full h-full object-cover" />
-                      ) : (
-                        <div
-                          className="w-full h-full flex items-center justify-center text-[44px]"
-                          style={{ background: card.popularBgColor || '#f5f3d7' }}
-                        >
-                          {card.popularEmoji || '🏦'}
-                        </div>
-                      )}
+                    {/* iOS app-icon style square */}
+                    <div className="relative">
+                      <div
+                        className="w-[76px] h-[76px] rounded-[20px] bg-gray-50 overflow-hidden"
+                        style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.10)' }}
+                      >
+                        {card.imageUrl ? (
+                          <img src={card.imageUrl} alt={card.name || ''} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-[30px]">{card.popularEmoji || '🏦'}</span>
+                          </div>
+                        )}
+                      </div>
+                      {/* Red % promo badge — bottom-right of icon */}
+                      <div className="absolute -bottom-1 -right-1 w-[18px] h-[18px] bg-red-500 rounded-full flex items-center justify-center shadow-sm">
+                        <span className="text-white font-bold leading-none" style={{ fontSize: '8px' }}>%</span>
+                      </div>
                     </div>
-                    {/* Text */}
-                    <div className="p-2.5">
-                      <h3 className="font-semibold text-[12px] text-gray-900 truncate">{card.name}</h3>
-                      {card.description && (
-                        <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">{card.description}</p>
-                      )}
-                    </div>
+                    {/* Name */}
+                    <p className="mt-2.5 text-[11px] font-medium text-gray-800 text-center leading-tight w-full" style={{ overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{card.name}</p>
                   </div>
                 ))}
               </div>
@@ -333,45 +334,58 @@ export default function App() {
 
           {/* ── New Partners ──────────────────────────────────────────────── */}
           {newPartners.length > 0 && (
-            <div className="bg-white mb-2 px-4 py-4">
-              <h2 className="text-[17px] font-semibold text-gray-900 mb-3">New Partner</h2>
-              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-                {newPartners.map((partner) => (
-                  <div
-                    key={partner.id}
-                    className="flex-shrink-0 w-[140px] rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm cursor-pointer active:scale-[0.97] transition-transform"
-                  >
-                    {/* Image head */}
-                    <div className="w-full h-[100px] relative overflow-hidden">
-                      {partner.imageUrl ? (
-                        <img src={partner.imageUrl} alt={partner.name || ''} className="w-full h-full object-cover" />
-                      ) : (
-                        <div
-                          className="w-full h-full flex items-center justify-center text-[44px]"
-                          style={{ background: partner.newBgColor || '#f0f4ff' }}
-                        >
-                          {partner.icon?.startsWith('http') ? (
-                            <img src={partner.icon} alt="" className="w-14 h-14 object-contain" />
-                          ) : (
-                            partner.icon || '🏦'
+            <div className="bg-white mb-2 pt-4 pb-4">
+              <h2 className="text-[17px] font-semibold text-gray-900 mb-3 px-4">New Partner</h2>
+              {/* 2-row horizontal scroll grid */}
+              <div className="overflow-x-auto scrollbar-hide px-4">
+                <div
+                  className="grid grid-rows-2 grid-flow-col gap-2.5"
+                  style={{ width: 'max-content' }}
+                >
+                  {newPartners.map((partner: NewPartnerDto) => (
+                    <div
+                      key={partner.id}
+                      className="flex rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform bg-gray-50"
+                      style={{ width: '248px', height: '82px' }}
+                    >
+                      {/* Left: screenshot preview */}
+                      <div className="w-[100px] flex-shrink-0 h-full overflow-hidden">
+                        {partner.imageUrl ? (
+                          <img src={partner.imageUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <span className="text-[32px]">
+                              {partner.icon && !partner.icon.startsWith('http') ? partner.icon : '🏦'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      {/* Right: icon + title + description */}
+                      <div className="flex-1 px-2.5 py-2 flex flex-col justify-center min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <div className="w-[20px] h-[20px] rounded-full bg-gray-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                            {partner.icon?.startsWith('http') ? (
+                              <img src={partner.icon} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <span style={{ fontSize: '11px' }}>{partner.icon || '🏦'}</span>
+                            )}
+                          </div>
+                          <h3 className="font-bold text-[12px] text-gray-900 truncate">{partner.name}</h3>
+                          {partner.newBadge && (
+                            <span className="ml-auto flex-shrink-0 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                              {partner.newBadge}
+                            </span>
                           )}
                         </div>
-                      )}
-                      {partner.newBadge && (
-                        <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                          {partner.newBadge}
-                        </div>
-                      )}
+                        {partner.description && (
+                          <p className="text-[10px] text-gray-500 leading-snug line-clamp-2">
+                            {partner.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    {/* Text */}
-                    <div className="p-2.5">
-                      <h3 className="font-semibold text-[12px] text-gray-900 truncate">{partner.name}</h3>
-                      {partner.description && (
-                        <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-snug">{partner.description}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           )}
